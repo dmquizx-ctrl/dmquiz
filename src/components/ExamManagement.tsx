@@ -48,7 +48,7 @@ export const ExamManagement = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setExams(data || []);
+      setExams((data || []) as unknown as Exam[]);
     } catch (error: any) {
       toast({
         title: 'เกิดข้อผิดพลาด',

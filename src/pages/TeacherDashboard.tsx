@@ -61,7 +61,7 @@ const TeacherDashboard = () => {
       const { data, error } = await supabase
         .from('subjects')
         .select('*')
-        .eq('teacher_id', user?.id)
+        .eq('teacher_id', user?.id ?? '')
         .order('subject_code');
 
       if (error) throw error;

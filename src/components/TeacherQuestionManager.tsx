@@ -88,7 +88,7 @@ const TeacherQuestionManager = ({ teacherId, subjects }: TeacherQuestionManagerP
 
       if (error) throw error;
       if (!isMountedRef.current) return;
-      setQuestions(data || []);
+      setQuestions((data || []) as unknown as Question[]);
     } catch (error: any) {
       console.error('Error fetching questions:', error);
       if (!isMountedRef.current) return;
