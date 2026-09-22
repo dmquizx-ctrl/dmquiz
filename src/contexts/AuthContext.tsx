@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface User {
   id: string;
@@ -54,19 +55,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (username: string, password: string, userType: 'student' | 'admin' | 'teacher') => {
-    const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/auth`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-      },
-      body: JSON.stringify({ username, password, userType })
+    const { data, error } = await supabase.functions.invoke('auth', {
+      body: { username, password, userType },
     });
 
-    const data = await response.json();
+    if (error) {
+      let message = 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ';
+      const context = (error as { context?: Response }).context;
+      if (context && typeof context.json === 'function') {
+        try {
+          const payload = await context.json();
+          if (payload?.error) message = payload.error;
+        } catch {
+          // keep the default message
+        }
+      }
+      throw new Error(message);
+    }
 
-    if (!response.ok) {
-      throw new Error(data.error || 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ');
+    if (!data?.user) {
+      throw new Error(data?.error || 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ');
     }
 
     const authenticatedUser = normalizeUser(data.user);
