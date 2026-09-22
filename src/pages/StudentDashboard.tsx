@@ -72,14 +72,7 @@ export const StudentDashboard = () => {
         setSubjects((subjectsData ?? []) as SubjectWithExams[]);
       }
 
-      const { data: attemptsData, error: attemptsError } = await supabase
-        .from('exam_attempts')
-        .select('exam_id')
-        .eq('student_id', user.id);
-
-      if (!attemptsError) {
-        setCompletedExamIds((attemptsData ?? []).map((item: { exam_id: string }) => item.exam_id));
-      }
+      setCompletedExamIds([]);
     } catch (error) {
       console.error('Error fetching student dashboard data:', error);
       toast({

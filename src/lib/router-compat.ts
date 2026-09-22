@@ -13,5 +13,5 @@ export function useNavigate() {
 }
 
 export function useParams<T extends Record<string, string | undefined>>(): T {
-  return useTanstackParams({ strict: false }) as T;
+  return (useTanstackParams as unknown as (opts: { strict: false }) => T)({ strict: false });
 }
