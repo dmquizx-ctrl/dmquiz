@@ -14,13 +14,375 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      admins: {
+        Row: {
+          created_at: string | null
+          id: string
+          password_hash: string
+          username: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          password_hash: string
+          username: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          password_hash?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      exam_questions: {
+        Row: {
+          exam_id: string | null
+          id: string
+          question_id: string | null
+          question_order: number
+        }
+        Insert: {
+          exam_id?: string | null
+          id?: string
+          question_id?: string | null
+          question_order: number
+        }
+        Update: {
+          exam_id?: string | null
+          id?: string
+          question_id?: string | null
+          question_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_questions_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_questions_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_results: {
+        Row: {
+          answers: Json
+          completed_at: string | null
+          exam_id: string | null
+          id: string
+          score: number
+          student_id: string | null
+          total_questions: number
+        }
+        Insert: {
+          answers: Json
+          completed_at?: string | null
+          exam_id?: string | null
+          id?: string
+          score: number
+          student_id?: string | null
+          total_questions: number
+        }
+        Update: {
+          answers?: Json
+          completed_at?: string | null
+          exam_id?: string | null
+          id?: string
+          score?: number
+          student_id?: string | null
+          total_questions?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_results_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_results_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exams: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          duration_minutes: number
+          end_at: string | null
+          exam_name: string
+          id: string
+          is_active: boolean | null
+          is_locked: boolean
+          question_count: number
+          start_at: string | null
+          subject_id: string | null
+          teacher_id: string | null
+          unlock_note: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          duration_minutes?: number
+          end_at?: string | null
+          exam_name: string
+          id?: string
+          is_active?: boolean | null
+          is_locked?: boolean
+          question_count?: number
+          start_at?: string | null
+          subject_id?: string | null
+          teacher_id?: string | null
+          unlock_note?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          duration_minutes?: number
+          end_at?: string | null
+          exam_name?: string
+          id?: string
+          is_active?: boolean | null
+          is_locked?: boolean
+          question_count?: number
+          start_at?: string | null
+          subject_id?: string | null
+          teacher_id?: string | null
+          unlock_note?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exams_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "admins"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exams_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exams_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      questions: {
+        Row: {
+          correct_answer: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          image_path: string | null
+          option_a: string
+          option_b: string
+          option_c: string
+          option_count: number | null
+          option_d: string
+          question_text: string
+          subject_id: string | null
+          teacher_id: string | null
+        }
+        Insert: {
+          correct_answer: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          image_path?: string | null
+          option_a: string
+          option_b: string
+          option_c: string
+          option_count?: number | null
+          option_d: string
+          question_text: string
+          subject_id?: string | null
+          teacher_id?: string | null
+        }
+        Update: {
+          correct_answer?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          image_path?: string | null
+          option_a?: string
+          option_b?: string
+          option_c?: string
+          option_count?: number | null
+          option_d?: string
+          question_text?: string
+          subject_id?: string | null
+          teacher_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "admins"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questions_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questions_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      students: {
+        Row: {
+          class: string
+          created_at: string | null
+          first_name: string
+          id: string
+          last_name: string
+          password_hash: string
+          student_id: string
+        }
+        Insert: {
+          class: string
+          created_at?: string | null
+          first_name: string
+          id?: string
+          last_name: string
+          password_hash: string
+          student_id: string
+        }
+        Update: {
+          class?: string
+          created_at?: string | null
+          first_name?: string
+          id?: string
+          last_name?: string
+          password_hash?: string
+          student_id?: string
+        }
+        Relationships: []
+      }
+      subjects: {
+        Row: {
+          academic_year: string
+          created_at: string | null
+          curriculum: string
+          grade_level: string
+          id: string
+          is_active: boolean
+          semester: string
+          subject_category: string
+          subject_code: string
+          subject_name: string
+          teacher_id: string | null
+        }
+        Insert: {
+          academic_year: string
+          created_at?: string | null
+          curriculum: string
+          grade_level: string
+          id?: string
+          is_active?: boolean
+          semester: string
+          subject_category?: string
+          subject_code: string
+          subject_name: string
+          teacher_id?: string | null
+        }
+        Update: {
+          academic_year?: string
+          created_at?: string | null
+          curriculum?: string
+          grade_level?: string
+          id?: string
+          is_active?: boolean
+          semester?: string
+          subject_category?: string
+          subject_code?: string
+          subject_name?: string
+          teacher_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subjects_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teachers: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          first_name: string
+          id: string
+          last_name: string
+          password_hash: string | null
+          phone: string | null
+          teacher_code: string
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          first_name: string
+          id?: string
+          last_name: string
+          password_hash?: string | null
+          phone?: string | null
+          teacher_code: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          first_name?: string
+          id?: string
+          last_name?: string
+          password_hash?: string | null
+          phone?: string | null
+          teacher_code?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_exam_questions: {
+        Args: {
+          p_exam_id: string
+          p_question_count: number
+          p_subject_id?: string
+          p_teacher_id?: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
