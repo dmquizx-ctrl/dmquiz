@@ -201,19 +201,20 @@ function PrintReport({
   return (
     <div className="print-document">
       <header className="print-header">
-        <p className="print-organization">รายงานผลการประเมินผลสัมฤทธิ์ทางการเรียน</p>
-        <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <h1>รายงานผลการประเมินผลสัมฤทธิ์ทางการเรียน</h1>
+        <div
+          className="print-meta-grid"
+          style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '2px 28px', marginTop: 10, textAlign: 'left' }}
+        >
           <p><strong>รายวิชา:</strong> {exam.subject_name}</p>
           <p><strong>ชุดข้อสอบ:</strong> {exam.exam_name}</p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 16 }}>
-            <p><strong>ระดับชั้น:</strong> {exam.grade_level}</p>
-            <p><strong>ห้องเรียน:</strong> {className}</p>
-            <p><strong>วันที่พิมพ์:</strong> {new Date().toLocaleDateString('th-TH')}</p>
-          </div>
+          <p><strong>ระดับชั้น:</strong> {exam.grade_level}</p>
+          <p><strong>ห้องเรียน:</strong> {className}</p>
+          <p><strong>วันที่พิมพ์:</strong> {new Date().toLocaleDateString('th-TH')}</p>
         </div>
       </header>
 
-      <div className="print-summary">
+      <div className="print-summary" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '6px 18px' }}>
         <span>จำนวนนักเรียนที่มีผลคะแนน: {results.length} คน</span>
         <span>คะแนนเฉลี่ย: {stats.averageScore} ({stats.averagePercentage}%)</span>
         <span>สูงสุด/ต่ำสุด: {stats.highest}% / {stats.lowest}%</span>
