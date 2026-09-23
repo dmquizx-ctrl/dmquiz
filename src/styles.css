@@ -148,6 +148,37 @@
   backdrop-filter: blur(4px);
 }
 
+/* Report tables: keep columns aligned and allow narrow screens to scroll instead of wrapping. */
+.overflow-hidden.rounded-xl.border.border-slate-200.print-controls {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.overflow-hidden.rounded-xl.border.border-slate-200.print-controls table {
+  width: 100%;
+  min-width: 680px;
+  table-layout: fixed;
+}
+
+.overflow-hidden.rounded-xl.border.border-slate-200.print-controls th,
+.overflow-hidden.rounded-xl.border.border-slate-200.print-controls td {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.overflow-hidden.rounded-xl.border.border-slate-200.print-controls th:nth-child(1),
+.overflow-hidden.rounded-xl.border.border-slate-200.print-controls td:nth-child(1) { width: 8%; text-align: center; }
+.overflow-hidden.rounded-xl.border.border-slate-200.print-controls th:nth-child(2),
+.overflow-hidden.rounded-xl.border.border-slate-200.print-controls td:nth-child(2) { width: 19%; }
+.overflow-hidden.rounded-xl.border.border-slate-200.print-controls th:nth-child(3),
+.overflow-hidden.rounded-xl.border.border-slate-200.print-controls td:nth-child(3) { width: 25%; }
+.overflow-hidden.rounded-xl.border.border-slate-200.print-controls th:nth-child(4),
+.overflow-hidden.rounded-xl.border.border-slate-200.print-controls td:nth-child(4) { width: 14%; }
+.overflow-hidden.rounded-xl.border.border-slate-200.print-controls th:nth-child(5),
+.overflow-hidden.rounded-xl.border.border-slate-200.print-controls td:nth-child(5) { width: 14%; }
+.overflow-hidden.rounded-xl.border.border-slate-200.print-controls th:nth-child(6),
+.overflow-hidden.rounded-xl.border.border-slate-200.print-controls td:nth-child(6) { width: 20%; }
+
 /* A4 portrait report printing */
 @page {
   size: A4 portrait;
@@ -254,15 +285,17 @@
   }
 
   .print-document th:nth-child(1),
-  .print-document td:nth-child(1) { width: 12%; text-align: center; }
+  .print-document td:nth-child(1) { width: 8%; text-align: center; }
   .print-document th:nth-child(2),
-  .print-document td:nth-child(2) { width: 20%; }
+  .print-document td:nth-child(2) { width: 18%; }
   .print-document th:nth-child(3),
-  .print-document td:nth-child(3) { width: 32%; }
+  .print-document td:nth-child(3) { width: 30%; }
   .print-document th:nth-child(4),
-  .print-document td:nth-child(4) { width: 18%; }
+  .print-document td:nth-child(4) { width: 15%; }
   .print-document th:nth-child(5),
-  .print-document td:nth-child(5) { width: 18%; text-align: center; }
+  .print-document td:nth-child(5) { width: 14%; text-align: center; }
+  .print-document th:nth-child(6),
+  .print-document td:nth-child(6) { width: 15%; text-align: center; }
 
   .print-document tr {
     break-inside: avoid;
