@@ -177,6 +177,29 @@ function ScoreBadge({ percentage }: { percentage: number }) {
   );
 }
 
+// Print-only performance indicator. The on-screen ScoreBadge tells bands
+// apart purely by pastel background color, which converges to near-identical
+// gray on a black & white printer. This renders a filled-dot count (4 dots
+// for the top band down to 1 for the bottom) alongside a bold label, so the
+// ranking survives with zero reliance on color.
+const PRINT_LEVEL_DOTS = SCORE_BANDS.length;
+
+function PrintLevelBadge({ percentage }: { percentage: number }) {
+  const band = getScoreBand(percentage);
+  const bandIndex = SCORE_BANDS.findIndex((b) => b.label === band.label);
+  const filled = PRINT_LEVEL_DOTS - bandIndex;
+  return (
+    <span className="print-level">
+      <span className="print-level-dots" aria-hidden="true">
+        {Array.from({ length: PRINT_LEVEL_DOTS }).map((_, i) => (
+          <span key={i} className={`print-dot${i < filled ? ' print-dot-filled' : ''}`} />
+        ))}
+      </span>
+      <span className="print-level-label">{band.label}</span>
+    </span>
+  );
+}
+
 function DistributionChart({ distribution, total }: { distribution: ReportStats['distribution']; total: number }) {
   return (
     <div className="rounded-xl border bg-white p-4 print-controls">
@@ -273,7 +296,7 @@ function PrintReport({
                 <td className="print-cell-center">{result.score}/{result.total_questions}</td>
                 <td className="print-cell-center">{percentage}%</td>
                 <td className="print-cell-center">
-                  <ScoreBadge percentage={percentage} />
+                  <PrintLevelBadge percentage={percentage} />
                 </td>
               </tr>
             );
