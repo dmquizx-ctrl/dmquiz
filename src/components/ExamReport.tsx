@@ -202,13 +202,14 @@ function PrintReport({
     <div className="print-document">
       <header className="print-header">
         <p className="print-organization">รายงานผลการประเมินผลสัมฤทธิ์ทางการเรียน</p>
-        <h1>รายงานผลคะแนนการทดสอบ</h1>
-        <div className="print-meta-grid">
+        <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
           <p><strong>รายวิชา:</strong> {exam.subject_name}</p>
           <p><strong>ชุดข้อสอบ:</strong> {exam.exam_name}</p>
-          <p><strong>ระดับชั้น:</strong> {exam.grade_level}</p>
-          <p><strong>ห้องเรียน:</strong> {className}</p>
-          <p><strong>วันที่พิมพ์:</strong> {new Date().toLocaleDateString('th-TH')}</p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 16 }}>
+            <p><strong>ระดับชั้น:</strong> {exam.grade_level}</p>
+            <p><strong>ห้องเรียน:</strong> {className}</p>
+            <p><strong>วันที่พิมพ์:</strong> {new Date().toLocaleDateString('th-TH')}</p>
+          </div>
         </div>
       </header>
 
