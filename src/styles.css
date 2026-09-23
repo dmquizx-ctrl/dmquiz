@@ -2,6 +2,16 @@
 @source "../src";
 @import "tw-animate-css";
 
+/*
+ * "TH Sarabun New"/"Thai Saraban" is the standard font for official Thai
+ * academic documents, but it isn't freely licensed for web embedding.
+ * "Sarabun" (Cadson Demak, Google Fonts) is the open-licensed sibling
+ * typeface almost universally used as its web substitute — same shapes,
+ * same readable proportions, used only on the printed report so the app UI
+ * keeps its own Bai Jamjuree font.
+ */
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap');
+
 @custom-variant dark (&:is(.dark *));
 
 /*
@@ -39,6 +49,7 @@
   --color-ring: var(--ring);
   --color-ring-offset-background: var(--background);
   --font-sans: "Bai Jamjuree", ui-sans-serif, system-ui, sans-serif;
+  --font-thai-report: "Sarabun", "TH Sarabun New", "Bai Jamjuree", sans-serif;
 }
 
 :root {
@@ -180,11 +191,22 @@
 .overflow-hidden.rounded-xl.border.border-slate-200.print-controls td:nth-child(6) { width: 20%; }
 
 /*
- * The printable A4 report (.print-document) must stay OUT of normal page
- * flow. It only has layout rules inside @media print below — left visible
- * on a normal screen it renders as raw, unstyled headings/paragraphs/tables
- * stacked above the real dashboard. Hidden here, switched back on for print.
+ * The printable A4 report (#print-portal-root / .print-document) is rendered
+ * through a React portal directly onto <body>, OUTSIDE the app's component
+ * tree. This is deliberate: earlier this was an absolutely-positioned node
+ * left nested inside the (hidden-but-still-in-flow) app tree, and Chromium's
+ * print pagination would place it wherever its hypothetical static position
+ * fell in that very tall hidden layout — producing a blank first page and a
+ * misplaced header, exactly like the bug reported. Portaling it to <body>
+ * and hiding every other body child with `display: none` (not
+ * `visibility: hidden`, which keeps layout space) removes that ambiguity
+ * entirely: on screen it stays invisible, and when printing it is the only
+ * thing left in the flow, so it starts naturally at the top of page 1.
  */
+#print-portal-root {
+  display: none;
+}
+
 .print-document {
   display: none;
 }
@@ -192,7 +214,7 @@
 /* A4 portrait report printing */
 @page {
   size: A4 portrait;
-  margin: 12mm;
+  margin: 14mm 12mm;
 }
 
 @media print {
@@ -200,37 +222,37 @@
   body {
     width: 210mm;
     min-width: 0;
+    height: auto;
     background: #fff !important;
   }
 
   body {
     margin: 0;
     color: #111827 !important;
-    font-family: "Bai Jamjuree", Arial, sans-serif;
+    font-family: var(--font-thai-report);
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
-  /* Only the report document is printed; app chrome and controls disappear. */
-  body * {
-    visibility: hidden !important;
+  /* Only the portaled report is printed; every other direct child of body
+     (the app root, toast portals, dialog portals, etc.) is removed from
+     the flow entirely so it can't affect pagination. */
+  body > *:not(#print-portal-root) {
+    display: none !important;
   }
 
-  .print-document,
-  .print-document * {
-    visibility: visible !important;
+  #print-portal-root {
+    display: block !important;
   }
 
   .print-document {
     display: block !important;
-    position: absolute;
-    inset: 0;
     width: 100%;
-    min-height: 0;
     margin: 0;
     padding: 0;
     background: #fff !important;
     color: #111827 !important;
+    font-family: var(--font-thai-report);
   }
 
   /* ---- Header: kicker + exam title + meta fields ---- */
@@ -245,30 +267,37 @@
   .print-kicker {
     margin: 0;
     color: #4b5563 !important;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.04em;
   }
 
   .print-title {
-    margin: 1.5mm 0 0;
+    margin: 2mm 0 0;
     color: #111827 !important;
-    font-size: 18px;
+    font-size: 22px;
     font-weight: 700;
-    line-height: 1.35;
+    line-height: 1.3;
     letter-spacing: 0.01em;
   }
 
+  .print-subtitle {
+    margin: 1.5mm 0 0;
+    color: #374151 !important;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
   .print-meta {
-    margin-top: 3mm;
+    margin-top: 3.5mm;
     text-align: left;
   }
 
   .print-meta-line {
     margin: 0 0 1.5mm;
     color: #374151 !important;
-    font-size: 12px;
-    line-height: 1.45;
+    font-size: 13px;
+    line-height: 1.5;
   }
 
   .print-meta-row {
@@ -281,8 +310,8 @@
   .print-meta-row p {
     margin: 0;
     color: #374151 !important;
-    font-size: 12px;
-    line-height: 1.45;
+    font-size: 13px;
+    line-height: 1.5;
   }
 
   /* ---- Stat strip ---- */
@@ -310,19 +339,19 @@
 
   .print-stat-label {
     color: #6b7280 !important;
-    font-size: 9.5px;
+    font-size: 10.5px;
     font-weight: 600;
   }
 
   .print-stat-value {
     color: #111827 !important;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
   }
 
   .print-stat-value small {
     color: #4b5563 !important;
-    font-size: 10px;
+    font-size: 10.5px;
     font-weight: 600;
   }
 
@@ -332,7 +361,7 @@
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .print-document th,
@@ -388,7 +417,37 @@
   .print-signature {
     display: flex;
     justify-content: space-between;
-    margin-top: 10mm;
+    gap: 10mm;
+    margin-top: 12mm;
+  }
+
+  .print-signature-box {
+    flex: 1;
+    text-align: center;
+  }
+
+  .print-signature-line {
+    margin: 0 0 2mm;
+    color: #374151 !important;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+  }
+
+  .print-signature-name {
+    margin: 0;
+    color: #111827 !important;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .print-signature-role {
+    margin: 1mm 0 0;
+    color: #4b5563 !important;
+    font-size: 12px;
+  }
+
+  .print-signature-date {
+    margin: 3mm 0 0;
     color: #374151 !important;
     font-size: 12px;
   }
