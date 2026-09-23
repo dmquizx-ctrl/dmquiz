@@ -201,24 +201,35 @@ function PrintReport({
   return (
     <div className="print-document">
       <header className="print-header">
-        <h1>รายงานผลการประเมินผลสัมฤทธิ์ทางการเรียน</h1>
-        <div
-          className="print-meta-grid"
-          style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '2px 28px', marginTop: 10, textAlign: 'left' }}
-        >
-          <p><strong>รายวิชา:</strong> {exam.subject_name}</p>
-          <p><strong>ชุดข้อสอบ:</strong> {exam.exam_name}</p>
-          <p><strong>ระดับชั้น:</strong> {exam.grade_level}</p>
-          <p><strong>ห้องเรียน:</strong> {className}</p>
-          <p><strong>วันที่พิมพ์:</strong> {new Date().toLocaleDateString('th-TH')}</p>
+        <p className="print-kicker">รายงานผลการประเมินผลสัมฤทธิ์ทางการเรียน</p>
+        <h1 className="print-title">{exam.exam_name}</h1>
+        <div className="print-meta">
+          <p className="print-meta-line"><strong>รายวิชา:</strong> {exam.subject_name}</p>
+          <div className="print-meta-row">
+            <p><strong>ระดับชั้น:</strong> {exam.grade_level}</p>
+            <p><strong>ห้องเรียน:</strong> {className}</p>
+            <p><strong>วันที่พิมพ์:</strong> {new Date().toLocaleDateString('th-TH')}</p>
+          </div>
         </div>
       </header>
 
-      <div className="print-summary" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '6px 18px' }}>
-        <span>จำนวนนักเรียนที่มีผลคะแนน: {results.length} คน</span>
-        <span>คะแนนเฉลี่ย: {stats.averageScore} ({stats.averagePercentage}%)</span>
-        <span>สูงสุด/ต่ำสุด: {stats.highest}% / {stats.lowest}%</span>
-        <span>ผ่านเกณฑ์: {stats.passRate}% ({stats.passCount}/{results.length} คน)</span>
+      <div className="print-summary">
+        <div className="print-stat">
+          <span className="print-stat-label">นักเรียนที่มีผลคะแนน</span>
+          <span className="print-stat-value">{results.length} คน</span>
+        </div>
+        <div className="print-stat">
+          <span className="print-stat-label">คะแนนเฉลี่ย</span>
+          <span className="print-stat-value">{stats.averageScore} <small>({stats.averagePercentage}%)</small></span>
+        </div>
+        <div className="print-stat">
+          <span className="print-stat-label">สูงสุด / ต่ำสุด</span>
+          <span className="print-stat-value">{stats.highest}% / {stats.lowest}%</span>
+        </div>
+        <div className="print-stat">
+          <span className="print-stat-label">ผ่านเกณฑ์ (≥50%)</span>
+          <span className="print-stat-value">{stats.passRate}% <small>({stats.passCount}/{results.length} คน)</small></span>
+        </div>
       </div>
 
       <table className="print-table">
@@ -238,13 +249,15 @@ function PrintReport({
             const percentage = toPercentage(result.score, result.total_questions);
             return (
               <tr key={result.id}>
-                <td>{index + 1}</td>
+                <td className="print-cell-center">{index + 1}</td>
                 <td>{result.students?.student_id ?? '-'}</td>
                 <td>{result.students ? `${result.students.first_name} ${result.students.last_name}` : '-'}</td>
                 <td>{result.students?.class ?? '-'}</td>
-                <td>{result.score}/{result.total_questions}</td>
-                <td>{percentage}%</td>
-                <td>{getScoreBand(percentage).label}</td>
+                <td className="print-cell-center">{result.score}/{result.total_questions}</td>
+                <td className="print-cell-center">{percentage}%</td>
+                <td className="print-cell-center">
+                  <ScoreBadge percentage={percentage} />
+                </td>
               </tr>
             );
           })}
