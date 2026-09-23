@@ -75,12 +75,12 @@
   --card-foreground: hsl(210 40% 98%);
   --popover: hsl(222 47% 11%);
   --popover-foreground: hsl(210 40% 98%);
-  --primary: hsl(217 91% 60%);
-  --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(217 33% 18%);
-  --secondary-foreground: hsl(210 40% 98%);
   --muted: hsl(217 33% 18%);
   --muted-foreground: hsl(215 20% 65%);
+  --secondary: hsl(217 33% 18%);
+  --secondary-foreground: hsl(210 40% 98%);
+  --primary: hsl(217 91% 60%);
+  --primary-foreground: hsl(0 0% 100%);
   --accent: hsl(199 89% 48%);
   --accent-foreground: hsl(0 0% 100%);
   --destructive: hsl(0 63% 50%);
@@ -91,14 +91,8 @@
 }
 
 @layer base {
-  * {
-    border-color: var(--color-border);
-  }
-
-  html {
-    min-width: 320px;
-  }
-
+  * { border-color: var(--color-border); }
+  html { min-width: 320px; }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
@@ -109,12 +103,7 @@
 
 @utility page-shell {
   min-height: 100vh;
-  background-image: linear-gradient(
-    to bottom right,
-    var(--color-slate-50),
-    var(--color-blue-50),
-    var(--color-cyan-50)
-  );
+  background-image: linear-gradient(to bottom right, var(--color-slate-50), var(--color-blue-50), var(--color-cyan-50));
   color: var(--color-slate-800);
 }
 
@@ -157,4 +146,111 @@
   padding: 0.5rem;
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   backdrop-filter: blur(4px);
+}
+
+/* A4 portrait report printing */
+@page {
+  size: A4 portrait;
+  margin: 12mm;
+}
+
+@media print {
+  html,
+  body {
+    width: 210mm;
+    min-width: 0;
+    background: #fff !important;
+  }
+
+  body {
+    margin: 0;
+    color: #111827 !important;
+    font-family: "Bai Jamjuree", Arial, sans-serif;
+  }
+
+  /* Keep only the generated report visible. This also hides app chrome,
+     navigation, sidebars, dialogs, buttons, and unrelated page content. */
+  body * {
+    visibility: hidden !important;
+  }
+
+  .print-document,
+  .print-document * {
+    visibility: visible !important;
+  }
+
+  .print-document {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    background: #fff !important;
+    color: #111827 !important;
+  }
+
+  .print-header {
+    margin-bottom: 6mm;
+    border-bottom: 1px solid #9ca3af;
+    padding-bottom: 4mm;
+    text-align: center;
+  }
+
+  .print-header h1 {
+    margin: 0 0 3mm;
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .print-header p {
+    margin: 1mm 0 0;
+    font-size: 12px;
+  }
+
+  .print-summary {
+    margin-bottom: 4mm;
+    font-size: 12px;
+  }
+
+  .print-document table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 11px;
+  }
+
+  .print-document th,
+  .print-document td {
+    border: 1px solid #6b7280 !important;
+    padding: 2.5mm 2mm;
+    color: #111827 !important;
+    background: #fff !important;
+    vertical-align: middle;
+  }
+
+  .print-document th {
+    background: #f3f4f6 !important;
+    font-weight: 700;
+    text-align: left;
+  }
+
+  .print-document th:nth-child(1),
+  .print-document td:nth-child(1) { width: 12%; text-align: center; }
+  .print-document th:nth-child(2),
+  .print-document td:nth-child(2) { width: 20%; }
+  .print-document th:nth-child(3),
+  .print-document td:nth-child(3) { width: 32%; }
+  .print-document th:nth-child(4),
+  .print-document td:nth-child(4) { width: 18%; }
+  .print-document th:nth-child(5),
+  .print-document td:nth-child(5) { width: 18%; text-align: center; }
+
+  .print-document tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .print-document thead {
+    display: table-header-group;
+  }
 }
