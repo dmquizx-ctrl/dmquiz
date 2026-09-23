@@ -75,12 +75,12 @@
   --card-foreground: hsl(210 40% 98%);
   --popover: hsl(222 47% 11%);
   --popover-foreground: hsl(210 40% 98%);
-  --muted: hsl(217 33% 18%);
-  --muted-foreground: hsl(215 20% 65%);
-  --secondary: hsl(217 33% 18%);
-  --secondary-foreground: hsl(210 40% 98%);
   --primary: hsl(217 91% 60%);
   --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(217 33% 18%);
+  --secondary-foreground: hsl(210 40% 98%);
+  --muted: hsl(217 33% 18%);
+  --muted-foreground: hsl(215 20% 65%);
   --accent: hsl(199 89% 48%);
   --accent-foreground: hsl(0 0% 100%);
   --destructive: hsl(0 63% 50%);
@@ -166,10 +166,11 @@
     margin: 0;
     color: #111827 !important;
     font-family: "Bai Jamjuree", Arial, sans-serif;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
-  /* Keep only the generated report visible. This also hides app chrome,
-     navigation, sidebars, dialogs, buttons, and unrelated page content. */
+  /* Only the report document is printed; app chrome and controls disappear. */
   body * {
     visibility: hidden !important;
   }
@@ -183,33 +184,51 @@
     position: absolute;
     inset: 0;
     width: 100%;
-    padding: 0;
+    min-height: 0;
     margin: 0;
+    padding: 0;
     background: #fff !important;
     color: #111827 !important;
   }
 
   .print-header {
-    margin-bottom: 6mm;
-    border-bottom: 1px solid #9ca3af;
-    padding-bottom: 4mm;
+    margin: 0 0 6mm;
+    border-bottom: 1.5px solid #374151;
+    padding: 0 0 4mm;
     text-align: center;
   }
 
   .print-header h1 {
     margin: 0 0 3mm;
+    color: #111827 !important;
     font-size: 20px;
     font-weight: 700;
+    letter-spacing: 0.01em;
   }
 
   .print-header p {
     margin: 1mm 0 0;
+    color: #374151 !important;
     font-size: 12px;
+    line-height: 1.45;
   }
 
   .print-summary {
-    margin-bottom: 4mm;
-    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    margin: 0 0 4mm;
+    border: 1px solid #d1d5db;
+    background: #f9fafb !important;
+    padding: 2.5mm 3mm;
+    color: #374151 !important;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .print-document > .overflow-hidden {
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
   }
 
   .print-document table {
@@ -229,7 +248,7 @@
   }
 
   .print-document th {
-    background: #f3f4f6 !important;
+    background: #e5e7eb !important;
     font-weight: 700;
     text-align: left;
   }
@@ -252,5 +271,9 @@
 
   .print-document thead {
     display: table-header-group;
+  }
+
+  .print-document tbody tr:nth-child(even) td {
+    background: #f9fafb !important;
   }
 }
