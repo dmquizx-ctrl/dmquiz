@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   ArrowDownAZ,
   ArrowUpDown,
@@ -15,6 +17,7 @@ import {
   GraduationCap,
   LucideIcon,
   Loader2,
+  PenLine,
   Printer,
   RotateCcw,
   Trophy,
@@ -50,9 +53,18 @@ interface ExamOption {
   grade_level: string;
 }
 
+interface Teacher {
+  id: string;
+  first_name: string;
+  last_name: string;
+}
+
 interface Props {
   teacherId: string;
 }
+
+// Sentinel value for "type the preparer's name in myself" in the teacher Select.
+const CUSTOM_TEACHER = '__custom__';
 
 type SortKey = 'name' | 'score';
 
@@ -192,17 +204,22 @@ function PrintReport({
   className,
   results,
   stats,
+  preparerName,
+  directorName,
 }: {
   exam: ExamOption;
   className: string;
   results: ExamResult[];
   stats: ReportStats;
+  preparerName: string;
+  directorName: string;
 }) {
   return (
     <div className="print-document">
       <header className="print-header">
         <p className="print-kicker">รายงานผลการประเมินผลสัมฤทธิ์ทางการเรียน</p>
         <h1 className="print-title">{exam.exam_name}</h1>
+        <p className="print-subtitle">{exam.subject_name} • {exam.grade_level}</p>
         <div className="print-meta">
           <p className="print-meta-line"><strong>รายวิชา:</strong> {exam.subject_name}</p>
           <div className="print-meta-row">
@@ -265,8 +282,18 @@ function PrintReport({
       </table>
 
       <footer className="print-signature">
-        <div>ลงชื่อ ........................................................ ผู้จัดทำรายงาน</div>
-        <div>วันที่ ............ / ............ / ............</div>
+        <div className="print-signature-box">
+          <p className="print-signature-line">ลงชื่อ ........................................................</p>
+          <p className="print-signature-name">({preparerName || '.'.repeat(30)})</p>
+          <p className="print-signature-role">ผู้จัดทำรายงาน</p>
+          <p className="print-signature-date">วันที่ ............ / ............ / ............</p>
+        </div>
+        <div className="print-signature-box">
+          <p className="print-signature-line">ลงชื่อ ........................................................</p>
+          <p className="print-signature-name">({directorName || '.'.repeat(30)})</p>
+          <p className="print-signature-role">ผู้อำนวยการโรงเรียน</p>
+          <p className="print-signature-date">วันที่ ............ / ............ / ............</p>
+        </div>
       </footer>
     </div>
   );
@@ -296,6 +323,15 @@ const ExamReport = ({ teacherId }: Props) => {
   const [loadingExams, setLoadingExams] = useState(false);
   const [loadingResults, setLoadingResults] = useState(false);
   const [resettingId, setResettingId] = useState<string | null>(null);
+
+  // --- Report signatures: who prepared it, and the school director's name ---
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [selectedTeacherId, setSelectedTeacherId] = useState<string>(teacherId || CUSTOM_TEACHER);
+  const [customPreparerName, setCustomPreparerName] = useState('');
+  const [directorName, setDirectorName] = useState(
+    () => (typeof window !== 'undefined' && localStorage.getItem('examReport.directorName')) || '',
+  );
+
   const { toast } = useToast();
 
   const fetchExams = async () => {
@@ -347,8 +383,32 @@ const ExamReport = ({ teacherId }: Props) => {
     }
   };
 
+  // Pulled in for the "ผู้จัดทำรายงาน" (report preparer) dropdown on the print
+  // sheet. If the teachers table is unavailable or empty this fails
+  // silently — the UI falls back to a plain text field so printing never
+  // breaks because of it.
+  const fetchTeachers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('teachers')
+        .select('id, first_name, last_name')
+        .order('first_name', { ascending: true });
+      if (error) throw error;
+      setTeachers((data as Teacher[]) ?? []);
+    } catch {
+      setTeachers([]);
+    }
+  };
+
   useEffect(() => { fetchExams(); }, [teacherId]);
+  useEffect(() => { fetchTeachers(); }, []);
   useEffect(() => { fetchResults(); }, [selectedExam]);
+
+  // Remember the director's name locally so it doesn't need retyping every
+  // time a new report is printed.
+  useEffect(() => {
+    if (typeof window !== 'undefined') localStorage.setItem('examReport.directorName', directorName);
+  }, [directorName]);
 
   const subjects = useMemo(
     () => [...new Set(exams.map((e) => e.subject_name))].sort((a, b) => a.localeCompare(b, 'th')),
@@ -388,6 +448,13 @@ const ExamReport = ({ teacherId }: Props) => {
   const currentExam = exams.find((e) => e.id === selectedExam);
   const totalQuestions = filteredResults[0]?.total_questions ?? 0;
   const stats = useMemo(() => computeStats(filteredResults), [filteredResults]);
+
+  const usingCustomPreparer = selectedTeacherId === CUSTOM_TEACHER || !teachers.length;
+  const preparerName = useMemo(() => {
+    if (usingCustomPreparer) return customPreparerName;
+    const match = teachers.find((t) => t.id === selectedTeacherId);
+    return match ? `${match.first_name} ${match.last_name}` : customPreparerName;
+  }, [usingCustomPreparer, teachers, selectedTeacherId, customPreparerName]);
 
   const resetSelection = () => {
     setSelectedExam('');
@@ -533,6 +600,54 @@ const ExamReport = ({ teacherId }: Props) => {
         )}
 
         {selectedExam && (
+          <div className="rounded-xl border bg-slate-50/70 p-4 print-controls">
+            <div className="mb-3 flex items-center gap-2">
+              <PenLine className="h-4 w-4 text-primary" />
+              <div>
+                <p className="font-semibold">ผู้ลงนามในรายงาน</p>
+                <p className="text-xs text-muted-foreground">ใช้แสดงในเอกสารที่พิมพ์ออกมา</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">ผู้จัดทำรายงาน</label>
+                <Select value={selectedTeacherId} onValueChange={setSelectedTeacherId}>
+                  <SelectTrigger className="h-11 bg-white">
+                    <SelectValue placeholder="เลือกครูผู้จัดทำรายงาน" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {teachers.map((teacher) => (
+                      <SelectItem key={teacher.id} value={teacher.id}>
+                        {teacher.first_name} {teacher.last_name}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value={CUSTOM_TEACHER}>พิมพ์ชื่อเอง...</SelectItem>
+                  </SelectContent>
+                </Select>
+                {usingCustomPreparer && (
+                  <Input
+                    className="mt-2 h-11 bg-white"
+                    placeholder="ชื่อ-สกุล ผู้จัดทำรายงาน"
+                    value={customPreparerName}
+                    onChange={(e) => setCustomPreparerName(e.target.value)}
+                  />
+                )}
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">ผู้อำนวยการโรงเรียน</label>
+                <Input
+                  className="h-11 bg-white"
+                  placeholder="ชื่อ-สกุล ผู้อำนวยการโรงเรียน"
+                  value={directorName}
+                  onChange={(e) => setDirectorName(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {selectedExam && (
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between print-controls">
             <div>
               <p className="text-sm font-semibold">ผลคะแนนนักเรียน</p>
@@ -568,14 +683,24 @@ const ExamReport = ({ teacherId }: Props) => {
           </div>
         )}
 
-        {selectedExam && currentExam && printResults.length > 0 && stats && (
-          <PrintReport
-            exam={currentExam}
-            className={selectedClass === 'all' ? 'ทุกห้อง' : selectedClass}
-            results={printResults}
-            stats={stats}
-          />
-        )}
+        {selectedExam &&
+          currentExam &&
+          printResults.length > 0 &&
+          stats &&
+          typeof document !== 'undefined' &&
+          createPortal(
+            <div id="print-portal-root">
+              <PrintReport
+                exam={currentExam}
+                className={selectedClass === 'all' ? 'ทุกห้อง' : selectedClass}
+                results={printResults}
+                stats={stats}
+                preparerName={preparerName}
+                directorName={directorName}
+              />
+            </div>,
+            document.body,
+          )}
 
         {loadingResults && (
           <div className="rounded-xl border bg-white p-10 text-center">
