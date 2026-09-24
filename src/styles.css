@@ -85,10 +85,6 @@
   --card-foreground: hsl(210 40% 98%);
   --popover: hsl(222 47% 11%);
   --popover-foreground: hsl(210 40% 98%);
-  --primary: hsl(217 91% 60%);
-  --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(217 33% 18%);
-  --secondary-foreground: hsl(210 40% 98%);
   --muted: hsl(217 33% 18%);
   --muted-foreground: hsl(215 20% 65%);
   --accent: hsl(199 89% 48%);
@@ -145,7 +141,7 @@
   border-radius: 1rem;
   border: 1px solid color-mix(in oklab, white 15%, transparent);
   color: white;
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  box-shadow: 0 10px 15px -5px rgb(0 0 0 / 0.1);
   transition: all 300ms;
 }
 
@@ -230,14 +226,16 @@
   body {
     margin: 0;
     color: #111827 !important;
-    font-family: var(--font-thai-report);
+    font-family: 'TH Sarabun New', 'Sarabun', sans-serif;
+    font-size: 16pt;
+    line-height: 1.4;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
   /* Only the portaled report is printed; every other direct child of body
-     (the app root, toast portals, dialog portals, etc.) is removed from
-     the flow entirely so it can't affect pagination. */
+     (the app root, toast portals, dialog portals, etc.) is removed from the
+     flow entirely so it can't affect pagination. */
   body > *:not(#print-portal-root) {
     display: none !important;
   }
@@ -253,7 +251,7 @@
     padding: 0;
     background: #fff !important;
     color: #111827 !important;
-    font-family: var(--font-thai-report);
+    font-family: 'TH Sarabun New', 'Sarabun', sans-serif;
   }
 
   /* ---- Header: kicker + exam title + meta fields ----
@@ -273,7 +271,7 @@
   .print-kicker {
     margin: 0;
     color: #111827 !important;
-    font-size: 11.5px;
+    font-size: 11.5pt;
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -282,7 +280,7 @@
   .print-title {
     margin: 2.5mm 0 0;
     color: #111827 !important;
-    font-size: 27px;
+    font-size: 20pt;
     font-weight: 800;
     line-height: 1.3;
     letter-spacing: 0.01em;
@@ -291,7 +289,7 @@
   .print-subtitle {
     margin: 2mm 0 0;
     color: #374151 !important;
-    font-size: 14px;
+    font-size: 16pt;
     font-weight: 600;
   }
 
@@ -304,7 +302,7 @@
   .print-meta-line {
     margin: 0 0 2mm;
     color: #374151 !important;
-    font-size: 14px;
+    font-size: 14pt;
     font-weight: 500;
     line-height: 1.5;
   }
@@ -319,7 +317,7 @@
   .print-meta-row p {
     margin: 0;
     color: #374151 !important;
-    font-size: 14px;
+    font-size: 14pt;
     font-weight: 500;
     line-height: 1.5;
   }
@@ -352,49 +350,50 @@
 
   .print-stat-label {
     color: #374151 !important;
-    font-size: 11px;
+    font-size: 11pt;
     font-weight: 700;
   }
 
   .print-stat-value {
     color: #111827 !important;
-    font-size: 26px;
+    font-size: 26pt;
     font-weight: 800;
     line-height: 1.15;
   }
 
   .print-stat-value small {
     color: #374151 !important;
-    font-size: 12px;
+    font-size: 12pt;
     font-weight: 600;
   }
 
   /* ---- Table ----
-     Larger type and roomier rows: this both fixes the "too small to read
-     on paper" complaint and eats up the empty lower half of the page. */
+     Match the admin A4 report's font and table treatment. The cell padding
+     is one point tighter than admin (3pt/7pt instead of 4pt/8pt) so the
+     teacher report fits one additional narrow row on the page. */
 
   .print-document table {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
-    font-size: 14px;
+    font-size: 15pt;
   }
 
   .print-document th,
   .print-document td {
-    border: 1.25px solid #374151 !important;
-    padding: 3.5mm 2.5mm;
-    color: #111827 !important;
+    border: 1pt solid #000 !important;
+    padding: 3pt 7pt;
+    color: #000 !important;
     background: #fff !important;
     overflow-wrap: break-word;
     word-break: break-word;
     vertical-align: middle;
-    line-height: 1.35;
+    line-height: 1.4;
   }
 
   .print-document th {
-    background: #d1d5db !important;
-    font-size: 12.5px;
+    background: #f0f0f0 !important;
+    font-size: 15pt;
     font-weight: 700;
     text-align: left;
   }
@@ -463,7 +462,7 @@
   }
 
   .print-level-label {
-    font-size: 11.5px;
+    font-size: 11.5pt;
     font-weight: 700;
     color: #111827 !important;
   }
@@ -485,27 +484,27 @@
   .print-signature-line {
     margin: 0 0 2mm;
     color: #374151 !important;
-    font-size: 14px;
+    font-size: 14pt;
     letter-spacing: 0.02em;
   }
 
   .print-signature-name {
     margin: 0;
     color: #111827 !important;
-    font-size: 14px;
+    font-size: 14pt;
     font-weight: 700;
   }
 
   .print-signature-role {
     margin: 1mm 0 0;
     color: #374151 !important;
-    font-size: 13px;
+    font-size: 13pt;
     font-weight: 500;
   }
 
   .print-signature-date {
     margin: 3mm 0 0;
     color: #374151 !important;
-    font-size: 13px;
+    font-size: 13pt;
   }
 }
