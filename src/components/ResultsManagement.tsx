@@ -321,6 +321,15 @@ export function ResultsManagement() {
             </SelectContent>
           </Select>
         </div>
+
+        <Button
+          onClick={handlePrint}
+          disabled={filtered.length === 0}
+          className="gap-2"
+        >
+          <Printer className="h-4 w-4" />
+          พิมพ์รายงาน (A4)
+        </Button>
       </div>
 
       {/* สรุปผล */}
