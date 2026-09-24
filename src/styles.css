@@ -1,6 +1,6 @@
 @import "tailwindcss" source(none);
 @source "../src";
-@import "tw-animate.css";
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -105,7 +105,6 @@
 .overflow-hidden.rounded-xl.border.border-slate-200.print-controls th:nth-child(6), .overflow-hidden.rounded-xl.border.border-slate-200.print-controls td:nth-child(6) { width: 20%; }
 
 #print-portal-root, .print-document { display: none; }
-
 @page { size: A4 portrait; margin: 18mm 16mm; }
 
 @media print {
@@ -116,13 +115,14 @@
   .print-document { display: block !important; width: 100%; max-width: 178mm; margin: 0 auto; padding: 0; background: #fff !important; color: #111827 !important; font-family: var(--font-thai-report); }
 
   .print-header { display: flex; flex-direction: column; margin: 0 0 5mm; text-align: center; }
-  .print-kicker { display: block; order: 1; margin: 0 0 1.5mm; color: #111827 !important; font-size: 20pt; font-weight: 700; line-height: 1.15; }
-  .print-subtitle { order: 2; margin: 0 0 1.5mm; color: #111827 !important; font-size: 17pt; font-weight: 500; line-height: 1.2; }
-  .print-title { order: 3; margin: 0 0 1.5mm; color: #555 !important; font-size: 17pt; font-weight: 500; line-height: 1.25; }
-  .print-meta { order: 4; margin-top: 2.5mm; }
-  .print-meta-line { margin: 0 0 1.2mm; color: #555 !important; font-size: 16pt; font-weight: 400; line-height: 1.2; }
+  .print-kicker { margin: 0 0 1.5mm; color: #111827 !important; font-size: 20pt; font-weight: 700; line-height: 1.15; }
+  .print-subtitle { margin: 0 0 1.5mm; color: #111827 !important; font-size: 17pt; font-weight: 500; line-height: 1.2; }
+  .print-title { margin: 0 0 1.5mm; color: #555 !important; font-size: 17pt; font-weight: 500; line-height: 1.25; }
+  .print-meta { margin-top: 2.5mm; }
+  .print-meta-line, .print-meta-row p { color: #374151 !important; font-size: 16pt; line-height: 1.2; }
+  .print-meta-line { margin: 0 0 1.2mm; color: #555 !important; }
   .print-meta-row { display: flex; flex-wrap: nowrap; justify-content: space-between; align-items: center; gap: 4mm; border-bottom: 1.25px solid #9ca3af; padding: 1.5mm 0; }
-  .print-meta-row p { margin: 0; color: #374151 !important; font-size: 16pt; line-height: 1.2; }
+  .print-meta-row p { margin: 0; }
   .print-class-line { margin: 3.5mm 0 0; text-align: left; color: #111827 !important; font-size: 17pt; font-weight: 700; line-height: 1.2; }
 
   .print-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3mm; margin: 0 0 6mm; border-bottom: 1px solid #d1d5db; padding-bottom: 4mm; }
@@ -132,10 +132,9 @@
   .print-stat-value small { font-size: 13pt; font-weight: 600; }
 
   .print-document table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 16pt; }
-  .print-document th, .print-document td { border: 1.25px solid #374151 !important; padding: 2.2mm 2mm; color: #111827 !important; background: #fff !important; overflow-wrap: break-word; word-break: break-word; vertical-align: middle; line-height: 1; }
+  .print-document th, .print-document td { height: 13mm; border: 1.25px solid #374151 !important; padding: 2.2mm 2mm; color: #111827 !important; background: #fff !important; overflow-wrap: break-word; word-break: break-word; vertical-align: middle; line-height: 1; }
   .print-document th { background: #d1d5db !important; font-size: 16pt; font-weight: 700; text-align: center; }
-  .print-document th:nth-child(2), .print-document td:nth-child(2),
-  .print-document th:nth-child(4), .print-document td:nth-child(4) { text-align: center; }
+  .print-document th:nth-child(2), .print-document td:nth-child(2), .print-document th:nth-child(4), .print-document td:nth-child(4) { text-align: center; }
   .print-cell-center { text-align: center; }
   .print-document th:nth-child(1), .print-document td:nth-child(1) { width: 6%; text-align: center; }
   .print-document th:nth-child(2), .print-document td:nth-child(2) { width: 15%; }
@@ -144,26 +143,26 @@
   .print-document th:nth-child(5), .print-document td:nth-child(5) { width: 13%; text-align: center; }
   .print-document th:nth-child(6), .print-document td:nth-child(6) { width: 12%; text-align: center; }
   .print-document th:nth-child(7), .print-document td:nth-child(7) { width: 21%; text-align: center; }
-  .print-document tr { break-inside: avoid; page-break-inside: avoid; }
+  .print-document tr { height: 13mm; break-inside: avoid; page-break-inside: avoid; }
   .print-document thead { display: table-header-group; }
   .print-document tbody tr:nth-child(even) td { background: #f3f4f6 !important; }
 
-  .print-level { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.35mm; min-width: 0; padding: 0.6mm 1.4mm; border: 1px solid rgba(15, 23, 42, 0.08); border-radius: 999px; background: linear-gradient(180deg, #f8fafc 0%, #eff6ff 100%); box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06); }
-  .print-level-dots { display: flex; align-items: center; justify-content: center; gap: 0.55mm; }
-  .print-dot { width: 2.2mm; height: 2.2mm; border: 1px solid rgba(15, 23, 42, 0.25); border-radius: 50%; background: #e5e7eb; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8); }
-  .print-dot-filled { background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%); border-color: #2563eb; box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.18); }
-  .print-level:has(.print-dot:nth-child(4).print-dot-filled) { background: linear-gradient(180deg, #ecfdf5 0%, #d1fae5 100%); border-color: #86efac; }
-  .print-level:has(.print-dot:nth-child(3).print-dot-filled):not(:has(.print-dot:nth-child(4).print-dot-filled)) { background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%); border-color: #93c5fd; }
-  .print-level:has(.print-dot:nth-child(2).print-dot-filled):not(:has(.print-dot:nth-child(3).print-dot-filled)) { background: linear-gradient(180deg, #fff7ed 0%, #ffedd5 100%); border-color: #fdba74; }
-  .print-level:not(:has(.print-dot.print-dot-filled)) { background: linear-gradient(180deg, #fef2f2 0%, #fee2e2 100%); border-color: #fca5a5; }
-  .print-level-label { font-size: 10.5px; font-weight: 700; letter-spacing: 0; line-height: 1; color: #111827 !important; }
+  /* Score level: compact, fixed-width colour pill without dots. */
+  .print-level { display: flex; align-items: center; justify-content: center; min-width: 110px; width: 110px; box-sizing: border-box; margin: 0 auto; padding: 4px 16px; border-radius: 20px; font-size: 16pt; font-weight: 600; line-height: 1; white-space: nowrap; }
+  .print-level-dots { display: none !important; }
+  .print-level-label { color: inherit !important; font-size: inherit; font-weight: inherit; line-height: inherit; }
+  .print-level:has(.print-dot:nth-child(4).print-dot-filled) { background: #e8f5e9 !important; color: #2e7d32 !important; }
+  .print-level:has(.print-dot:nth-child(3).print-dot-filled):not(:has(.print-dot:nth-child(4).print-dot-filled)) { background: #e3f2fd !important; color: #1565c0 !important; }
+  .print-level:has(.print-dot:nth-child(2).print-dot-filled):not(:has(.print-dot:nth-child(3).print-dot-filled)) { background: #fff3e0 !important; color: #e65100 !important; }
+  .print-level:not(:has(.print-dot.print-dot-filled)) { background: #ffebee !important; color: #c62828 !important; }
 
   .print-signature { display: flex; justify-content: space-between; gap: 8mm; margin-top: 18pt; }
   .print-signature-box { flex: 1; text-align: center; }
   .print-signature-line { display: flex; align-items: baseline; justify-content: center; gap: 1.5mm; margin: 0 0 1mm; color: #374151 !important; font-size: 0; line-height: 1; }
   .print-signature-line::before { content: 'ลงชื่อ'; font-size: 16pt; }
   .print-signature-line::after { content: ''; display: inline-block; width: 30mm; border-bottom: 0.5px solid #6b7280; }
-  .print-signature-name { margin: 0; color: #111827 !important; font-size: 16pt; font-weight: 400; line-height: 1.15; }
-  .print-signature-role { margin: 0.5mm 0 0; color: #374151 !important; font-size: 16pt; font-weight: 400; line-height: 1.15; }
-  .print-signature-date { margin: 1.5mm 0 0; color: #374151 !important; font-size: 16pt; line-height: 1.15; }
+  .print-signature-name, .print-signature-role, .print-signature-date { color: #374151 !important; font-size: 16pt; font-weight: 400; line-height: 1.15; }
+  .print-signature-name { margin: 0; color: #111827 !important; }
+  .print-signature-role { margin: 0.5mm 0 0; }
+  .print-signature-date { margin: 1.5mm 0 0; }
 }
