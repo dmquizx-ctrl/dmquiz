@@ -126,9 +126,9 @@
   .print-meta-row p { margin: 0; color: #111827 !important; font-size: 13px; line-height: 1.2; }
   .print-class-line { margin: 2mm 0 0; text-align: left; color: #111827 !important; font-size: 15px; font-weight: 700; }
 
-  .print-document table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13px; }
+  .print-document table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 21px; }
   .print-document th, .print-document td { border: 1.25px solid #374151 !important; padding: 2.2mm 2mm; color: #111827 !important; background: #fff !important; overflow-wrap: break-word; word-break: break-word; vertical-align: middle; line-height: 1.15; }
-  .print-document th { background: #d1d5db !important; font-size: 12px; font-weight: 700; text-align: left; }
+  .print-document th { background: #d1d5db !important; font-size: 21px; font-weight: 700; text-align: left; }
   .print-cell-center { text-align: center; }
   .print-document th:nth-child(1), .print-document td:nth-child(1) { width: 6%; text-align: center; }
   .print-document th:nth-child(2), .print-document td:nth-child(2) { width: 15%; }
