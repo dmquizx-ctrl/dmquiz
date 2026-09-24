@@ -116,15 +116,21 @@
   #print-portal-root { display: block !important; }
   .print-document { display: block !important; width: 100%; margin: 0; padding: 0; background: #fff !important; color: #111827 !important; font-family: var(--font-thai-report); }
 
-  .print-header { margin: 0 0 4mm; text-align: center; }
+  .print-header { margin: 0 0 5mm; text-align: center; }
   .print-kicker { display: none; }
-  .print-title { margin: 0 0 1mm; color: #111827 !important; font-size: 21px; font-weight: 800; line-height: 1.1; }
-  .print-subtitle { margin: 0 0 1mm; color: #111827 !important; font-size: 15px; font-weight: 600; line-height: 1.2; }
-  .print-meta { margin-top: 2mm; }
-  .print-meta-line { margin: 0 0 1mm; color: #111827 !important; font-size: 13px; font-weight: 500; line-height: 1.25; }
-  .print-meta-row { display: flex; flex-wrap: nowrap; justify-content: space-between; align-items: center; gap: 4mm; border-bottom: 1.25px solid #111827; padding-bottom: 1mm; }
-  .print-meta-row p { margin: 0; color: #111827 !important; font-size: 13px; line-height: 1.2; }
+  .print-title { margin: 0 0 1.5mm; color: #111827 !important; font-size: 28px; font-weight: 700; line-height: 1.15; }
+  .print-subtitle { margin: 0 0 1.5mm; color: #111827 !important; font-size: 19px; font-weight: 600; line-height: 1.2; }
+  .print-meta { margin-top: 2.5mm; }
+  .print-meta-line { margin: 0 0 1.2mm; color: #111827 !important; font-size: 14.5px; font-weight: 500; line-height: 1.3; }
+  .print-meta-row { display: flex; flex-wrap: nowrap; justify-content: space-between; align-items: center; gap: 4mm; border-bottom: 1.25px solid #111827; padding-bottom: 1.5mm; }
+  .print-meta-row p { margin: 0; color: #111827 !important; font-size: 14.5px; line-height: 1.25; }
   .print-class-line { margin: 2mm 0 0; text-align: left; color: #111827 !important; font-size: 15px; font-weight: 700; }
+
+  .print-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3mm; margin: 0 0 6mm; }
+  .print-stat { display: flex; flex-direction: column; justify-content: center; gap: 1mm; border: 1px solid #e5e7eb; border-radius: 4px; background: #f8f9fa !important; padding: 3mm 2.5mm; min-height: 18mm; }
+  .print-stat-label { color: #374151 !important; font-size: 15px; font-weight: 600; line-height: 1.2; }
+  .print-stat-value { color: #111827 !important; font-size: 16px; font-weight: 700; line-height: 1.2; }
+  .print-stat-value small { font-size: 12px; font-weight: 600; }
 
   .print-document table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 21px; }
   .print-document th, .print-document td { border: 1.25px solid #374151 !important; padding: 2.2mm 2mm; color: #111827 !important; background: #fff !important; overflow-wrap: break-word; word-break: break-word; vertical-align: middle; line-height: 1.15; }
@@ -154,9 +160,9 @@
   .print-signature { display: flex; justify-content: space-between; gap: 8mm; margin-top: 9mm; }
   .print-signature-box { flex: 1; text-align: center; }
   .print-signature-line { display: flex; align-items: baseline; justify-content: center; gap: 1.5mm; margin: 0 0 1mm; color: #374151 !important; font-size: 0; line-height: 1; }
-  .print-signature-line::before { content: 'ลงชื่อ'; font-size: 13px; }
+  .print-signature-line::before { content: 'ลงชื่อ'; font-size: 14px; }
   .print-signature-line::after { content: ''; display: inline-block; width: 30mm; border-bottom: 0.5px solid #6b7280; }
-  .print-signature-name { margin: 0; color: #111827 !important; font-size: 13px; font-weight: 700; line-height: 1.15; }
-  .print-signature-role { margin: 0.5mm 0 0; color: #374151 !important; font-size: 12px; font-weight: 500; line-height: 1.15; }
-  .print-signature-date { margin: 1.5mm 0 0; color: #374151 !important; font-size: 12px; line-height: 1.15; }
+  .print-signature-name { margin: 0; color: #111827 !important; font-size: 14.5px; font-weight: 700; line-height: 1.15; }
+  .print-signature-role { margin: 0.5mm 0 0; color: #374151 !important; font-size: 14px; font-weight: 500; line-height: 1.15; }
+  .print-signature-date { margin: 1.5mm 0 0; color: #374151 !important; font-size: 14px; line-height: 1.15; }
 }
