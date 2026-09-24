@@ -241,8 +241,6 @@ function PrintReport({
     <div className="print-document">
       <header className="print-header">
         <p className="print-kicker">รายงานผลการประเมินผลสัมฤทธิ์ทางการเรียน</p>
-        <h1 className="print-title">{exam.exam_name}</h1>
-        <p className="print-subtitle">{exam.subject_name} • {exam.grade_level}</p>
         <div className="print-meta">
           <p className="print-meta-line"><strong>รายวิชา:</strong> {exam.subject_name}</p>
           <div className="print-meta-row">
