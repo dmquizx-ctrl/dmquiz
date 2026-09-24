@@ -226,14 +226,12 @@ function DistributionChart({ distribution, total }: { distribution: ReportStats[
 
 function PrintReport({
   exam,
-  className,
   results,
   stats,
   preparerName,
   directorName,
 }: {
   exam: ExamOption;
-  className: string;
   results: ExamResult[];
   stats: ReportStats;
   preparerName: string;
@@ -341,7 +339,6 @@ const ExamReport = ({ teacherId }: Props) => {
   const [selectedSubject, setSelectedSubject] = useState('');
   const [selectedGrade, setSelectedGrade] = useState('');
   const [selectedExam, setSelectedExam] = useState('');
-  const [selectedClass, setSelectedClass] = useState('all');
   const [sortKey, setSortKey] = useState<SortKey>('name');
   const [loadingExams, setLoadingExams] = useState(false);
   const [loadingResults, setLoadingResults] = useState(false);
@@ -450,15 +447,7 @@ const ExamReport = ({ teacherId }: Props) => {
     [exams, selectedSubject, selectedGrade],
   );
 
-  const classes = useMemo(
-    () => [...new Set(results.map((r) => r.students?.class).filter(Boolean) as string[])].sort((a, b) => a.localeCompare(b, 'th')),
-    [results],
-  );
-
-  const filteredResults = useMemo(
-    () => (selectedClass === 'all' ? results : results.filter((r) => r.students?.class === selectedClass)),
-    [results, selectedClass],
-  );
+  const filteredResults = results;
 
   const sortedResults = useMemo(() => {
     const rows = [...filteredResults];
@@ -483,7 +472,6 @@ const ExamReport = ({ teacherId }: Props) => {
 
   const resetSelection = () => {
     setSelectedExam('');
-    setSelectedClass('all');
     setResults([]);
   };
 
@@ -500,7 +488,6 @@ const ExamReport = ({ teacherId }: Props) => {
 
   const handleExamChange = (value: string) => {
     setSelectedExam(value);
-    setSelectedClass('all');
   };
 
   const handleReset = async (result: ExamResult) => {
@@ -676,21 +663,9 @@ const ExamReport = ({ teacherId }: Props) => {
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between print-controls">
             <div>
               <p className="text-sm font-semibold">ผลคะแนนนักเรียน</p>
-              <p className="text-xs text-muted-foreground">เลือกห้องเรียนเพื่อกรองข้อมูล หรือเรียงลำดับคะแนน</p>
+              <p className="text-xs text-muted-foreground">เรียงลำดับคะแนนหรือพิมพ์รายงาน</p>
             </div>
             <div className="flex w-full flex-wrap gap-2 sm:w-auto">
-              <Select value={selectedClass} onValueChange={setSelectedClass}>
-                <SelectTrigger className="w-full bg-white sm:w-[160px]">
-                  <SelectValue placeholder="ทุกห้อง" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">ทุกห้อง</SelectItem>
-                  {classes.map((className) => (
-                    <SelectItem key={className} value={className}>ห้อง {className}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
               <Button
                 variant="outline"
                 onClick={() => setSortKey((key) => (key === 'name' ? 'score' : 'name'))}
@@ -717,7 +692,6 @@ const ExamReport = ({ teacherId }: Props) => {
             <div id="print-portal-root">
               <PrintReport
                 exam={currentExam}
-                className={selectedClass === 'all' ? 'ทุกห้อง' : selectedClass}
                 results={printResults}
                 stats={stats}
                 preparerName={preparerName}
