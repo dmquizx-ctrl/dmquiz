@@ -10,7 +10,6 @@
  * same readable proportions, used only on the printed report so the app UI
  * keeps its own Bai Jamjuree font.
  */
-@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap');
 
 @custom-variant dark (&:is(.dark *));
 
