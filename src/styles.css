@@ -2,22 +2,7 @@
 @source "../src";
 @import "tw-animate-css";
 
-/*
- * "TH Sarabun New"/"Thai Saraban" is the standard font for official Thai
- * academic documents, but it isn't freely licensed for web embedding.
- * "Sarabun" (Cadson Demak, Google Fonts) is the open-licensed sibling
- * typeface almost universally used as its web substitute — same shapes,
- * same readable proportions, used only on the printed report so the app UI
- * keeps its own Bai Jamjuree font.
- */
-
 @custom-variant dark (&:is(.dark *));
-
-/*
- * Design system for the online exam system (restored from the original app).
- * Colors are defined as full CSS colors and exposed to Tailwind through
- * the @theme inline block below.
- */
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -85,6 +70,10 @@
   --card-foreground: hsl(210 40% 98%);
   --popover: hsl(222 47% 11%);
   --popover-foreground: hsl(210 40% 98%);
+  --primary: hsl(217 91% 60%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(217 33% 18%);
+  --secondary-foreground: hsl(210 40% 98%);
   --muted: hsl(217 33% 18%);
   --muted-foreground: hsl(215 20% 65%);
   --accent: hsl(199 89% 48%);
@@ -99,412 +88,79 @@
 @layer base {
   * { border-color: var(--color-border); }
   html { min-width: 320px; }
-  body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
-    min-width: 320px;
-    font-family: "Bai Jamjuree", sans-serif;
-  }
+  body { background-color: var(--color-background); color: var(--color-foreground); min-width: 320px; font-family: "Bai Jamjuree", sans-serif; }
 }
 
-@utility page-shell {
-  min-height: 100vh;
-  background-image: linear-gradient(to bottom right, var(--color-slate-50), var(--color-blue-50), var(--color-cyan-50));
-  color: var(--color-slate-800);
-}
+@utility page-shell { min-height: 100vh; background-image: linear-gradient(to bottom right, var(--color-slate-50), var(--color-blue-50), var(--color-cyan-50)); color: var(--color-slate-800); }
+@utility content-panel { border-radius: 26px; border: 1px solid color-mix(in oklab, var(--color-slate-200) 70%, transparent); background-color: color-mix(in oklab, white 80%, transparent); box-shadow: 0 12px 36px -24px rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); }
+@utility section-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-bottom: 1px solid color-mix(in oklab, var(--color-slate-200) 70%, transparent); padding-bottom: 1rem; }
+@utility dashboard-header { position: relative; overflow: hidden; color: white; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1); }
+@utility dashboard-stat { border-radius: 1rem; border: 1px solid color-mix(in oklab, white 15%, transparent); color: white; box-shadow: 0 10px 15px -5px rgb(0 0 0 / 0.1); transition: all 300ms; }
+@utility dashboard-action-bar { border-radius: 1rem; border: 1px solid color-mix(in oklab, var(--color-slate-200) 70%, transparent); background-color: color-mix(in oklab, white 75%, transparent); padding: 0.5rem; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); backdrop-filter: blur(4px); }
 
-@utility content-panel {
-  border-radius: 26px;
-  border: 1px solid color-mix(in oklab, var(--color-slate-200) 70%, transparent);
-  background-color: color-mix(in oklab, white 80%, transparent);
-  box-shadow: 0 12px 36px -24px rgba(15, 23, 42, 0.5);
-  backdrop-filter: blur(4px);
-}
-
-@utility section-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  border-bottom: 1px solid color-mix(in oklab, var(--color-slate-200) 70%, transparent);
-  padding-bottom: 1rem;
-}
-
-@utility dashboard-header {
-  position: relative;
-  overflow: hidden;
-  color: white;
-  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-}
-
-@utility dashboard-stat {
-  border-radius: 1rem;
-  border: 1px solid color-mix(in oklab, white 15%, transparent);
-  color: white;
-  box-shadow: 0 10px 15px -5px rgb(0 0 0 / 0.1);
-  transition: all 300ms;
-}
-
-@utility dashboard-action-bar {
-  border-radius: 1rem;
-  border: 1px solid color-mix(in oklab, var(--color-slate-200) 70%, transparent);
-  background-color: color-mix(in oklab, white 75%, transparent);
-  padding: 0.5rem;
-  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  backdrop-filter: blur(4px);
-}
-
-/* Report tables: keep columns aligned and allow narrow screens to scroll instead of wrapping. */
-.overflow-hidden.rounded-xl.border.border-slate-200.print-controls {
-  overflow-x: auto;
-  overflow-y: hidden;
-}
-
-.overflow-hidden.rounded-xl.border.border-slate-200.print-controls table {
-  width: 100%;
-  min-width: 680px;
-  table-layout: fixed;
-}
-
+.overflow-hidden.rounded-xl.border.border-slate-200.print-controls { overflow-x: auto; overflow-y: hidden; }
+.overflow-hidden.rounded-xl.border.border-slate-200.print-controls table { width: 100%; min-width: 680px; table-layout: fixed; }
 .overflow-hidden.rounded-xl.border.border-slate-200.print-controls th,
-.overflow-hidden.rounded-xl.border.border-slate-200.print-controls td {
-  vertical-align: middle;
-  white-space: nowrap;
-}
+.overflow-hidden.rounded-xl.border.border-slate-200.print-controls td { vertical-align: middle; white-space: nowrap; }
+.overflow-hidden.rounded-xl.border.border-slate-200.print-controls th:nth-child(1), .overflow-hidden.rounded-xl.border.border-slate-200.print-controls td:nth-child(1) { width: 8%; text-align: center; }
+.overflow-hidden.rounded-xl.border.border-slate-200.print-controls th:nth-child(2), .overflow-hidden.rounded-xl.border.border-slate-200.print-controls td:nth-child(2) { width: 19%; }
+.overflow-hidden.rounded-xl.border.border-slate-200.print-controls th:nth-child(3), .overflow-hidden.rounded-xl.border.border-slate-200.print-controls td:nth-child(3) { width: 25%; }
+.overflow-hidden.rounded-xl.border.border-slate-200.print-controls th:nth-child(4), .overflow-hidden.rounded-xl.border.border-slate-200.print-controls td:nth-child(4) { width: 14%; }
+.overflow-hidden.rounded-xl.border.border-slate-200.print-controls th:nth-child(5), .overflow-hidden.rounded-xl.border.border-slate-200.print-controls td:nth-child(5) { width: 14%; }
+.overflow-hidden.rounded-xl.border.border-slate-200.print-controls th:nth-child(6), .overflow-hidden.rounded-xl.border.border-slate-200.print-controls td:nth-child(6) { width: 20%; }
 
-.overflow-hidden.rounded-xl.border.border-slate-200.print-controls th:nth-child(1),
-.overflow-hidden.rounded-xl.border.border-slate-200.print-controls td:nth-child(1) { width: 8%; text-align: center; }
-.overflow-hidden.rounded-xl.border.border-slate-200.print-controls th:nth-child(2),
-.overflow-hidden.rounded-xl.border.border-slate-200.print-controls td:nth-child(2) { width: 19%; }
-.overflow-hidden.rounded-xl.border.border-slate-200.print-controls th:nth-child(3),
-.overflow-hidden.rounded-xl.border.border-slate-200.print-controls td:nth-child(3) { width: 25%; }
-.overflow-hidden.rounded-xl.border.border-slate-200.print-controls th:nth-child(4),
-.overflow-hidden.rounded-xl.border.border-slate-200.print-controls td:nth-child(4) { width: 14%; }
-.overflow-hidden.rounded-xl.border.border-slate-200.print-controls th:nth-child(5),
-.overflow-hidden.rounded-xl.border.border-slate-200.print-controls td:nth-child(5) { width: 14%; }
-.overflow-hidden.rounded-xl.border.border-slate-200.print-controls th:nth-child(6),
-.overflow-hidden.rounded-xl.border.border-slate-200.print-controls td:nth-child(6) { width: 20%; }
+#print-portal-root, .print-document { display: none; }
 
-/*
- * The printable A4 report (#print-portal-root / .print-document) is rendered
- * through a React portal directly onto <body>, OUTSIDE the app's component
- * tree. This is deliberate: earlier this was an absolutely-positioned node
- * left nested inside the (hidden-but-still-in-flow) app tree, and Chromium's
- * print pagination would place it wherever its hypothetical static position
- * fell in that very tall hidden layout — producing a blank first page and a
- * misplaced header, exactly like the bug reported. Portaling it to <body>
- * and hiding every other body child with `display: none` (not
- * `visibility: hidden`, which keeps layout space) removes that ambiguity
- * entirely: on screen it stays invisible, and when printing it is the only
- * thing left in the flow, so it starts naturally at the top of page 1.
- */
-#print-portal-root {
-  display: none;
-}
-
-.print-document {
-  display: none;
-}
-
-/* A4 portrait report printing. Uniform 15mm margins on every edge — the
-   previous asymmetric 12mm right margin left the print date line sitting
-   right at the paper edge, risking clipping on real printers. */
-@page {
-  size: A4 portrait;
-  margin: 15mm;
-}
+@page { size: A4 portrait; margin: 15mm; }
 
 @media print {
-  html,
-  body {
-    width: 210mm;
-    min-width: 0;
-    height: auto;
-    background: #fff !important;
-  }
+  html, body { width: 210mm; min-width: 0; height: auto; background: #fff !important; }
+  body { margin: 0; color: #000 !important; font-family: 'TH Sarabun New', 'Sarabun', sans-serif; font-size: 16pt; line-height: 1.4; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body > *:not(#print-portal-root) { display: none !important; }
+  #print-portal-root { display: block !important; }
+  .print-document { display: block !important; width: 100%; margin: 0; padding: 0; background: #fff !important; color: #000 !important; font-family: 'TH Sarabun New', 'Sarabun', sans-serif; }
 
-  body {
-    margin: 0;
-    color: #111827 !important;
-    font-family: 'TH Sarabun New', 'Sarabun', sans-serif;
-    font-size: 16pt;
-    line-height: 1.4;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
+  /* Teacher A4 header now follows the Admin A4 report: title, subject/exam line, and metadata with the same typography. */
+  .print-header { margin: 0 0 10pt; border-bottom: 1.5pt solid #000; padding: 0 0 4pt; text-align: center; }
+  .print-kicker { display: none; }
+  .print-title { margin: 0 0 4pt; color: #000 !important; font-size: 20pt; font-weight: 700; line-height: 1.2; letter-spacing: normal; }
+  .print-subtitle { margin: 0 0 2pt; color: #000 !important; font-size: 16pt; font-weight: 400; line-height: 1.25; }
+  .print-meta { margin-top: 6pt; padding: 0; text-align: left; }
+  .print-meta-line { margin: 0 0 2pt; color: #000 !important; font-size: 14pt; font-weight: 400; line-height: 1.3; }
+  .print-meta-row { display: flex; flex-wrap: nowrap; justify-content: space-between; gap: 8pt; }
+  .print-meta-row p { margin: 0; color: #000 !important; font-size: 14pt; font-weight: 400; line-height: 1.3; }
 
-  /* Only the portaled report is printed; every other direct child of body
-     (the app root, toast portals, dialog portals, etc.) is removed from the
-     flow entirely so it can't affect pagination. */
-  body > *:not(#print-portal-root) {
-    display: none !important;
-  }
+  .print-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin: 0 0 5mm; border: 1pt solid #000; background: #f0f0f0 !important; }
+  .print-stat { display: flex; flex-direction: column; gap: 1mm; border-right: 1pt solid #000; padding: 3mm; }
+  .print-stat:last-child { border-right: 0; }
+  .print-stat-label { color: #000 !important; font-size: 11pt; font-weight: 700; }
+  .print-stat-value { color: #000 !important; font-size: 22pt; font-weight: 700; line-height: 1.15; }
+  .print-stat-value small { color: #000 !important; font-size: 12pt; font-weight: 400; }
 
-  #print-portal-root {
-    display: block !important;
-  }
+  .print-document table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 15pt; }
+  .print-document th, .print-document td { border: 1pt solid #000 !important; padding: 3pt 7pt; color: #000 !important; background: #fff !important; overflow-wrap: break-word; word-break: break-word; vertical-align: middle; line-height: 1.4; }
+  .print-document th { background: #f0f0f0 !important; font-size: 15pt; font-weight: 700; text-align: left; }
+  .print-cell-center { text-align: center; }
+  .print-document th:nth-child(1), .print-document td:nth-child(1) { width: 6%; text-align: center; }
+  .print-document th:nth-child(2), .print-document td:nth-child(2) { width: 15%; }
+  .print-document th:nth-child(3), .print-document td:nth-child(3) { width: 24%; }
+  .print-document th:nth-child(4), .print-document td:nth-child(4) { width: 9%; }
+  .print-document th:nth-child(5), .print-document td:nth-child(5) { width: 13%; text-align: center; }
+  .print-document th:nth-child(6), .print-document td:nth-child(6) { width: 12%; text-align: center; }
+  .print-document th:nth-child(7), .print-document td:nth-child(7) { width: 21%; text-align: center; }
+  .print-document tr { break-inside: avoid; page-break-inside: avoid; }
+  .print-document thead { display: table-header-group; }
+  .print-document tbody tr:nth-child(even) td { background: #f3f4f6 !important; }
 
-  .print-document {
-    display: block !important;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    background: #fff !important;
-    color: #111827 !important;
-    font-family: 'TH Sarabun New', 'Sarabun', sans-serif;
-  }
-
-  /* ---- Header: kicker + exam title + meta fields ----
-     Three clearly different weights so the eye finds the main heading
-     instantly: the eyebrow stays small but bold and near-black (a faded
-     gray label reads as invisible on a cheap B/W printer), the exam title
-     is the largest, heaviest thing on the page, and the subtitle sits
-     between the two. */
-
-  .print-header {
-    margin: 0 0 6mm;
-    border-bottom: 2px solid #111827;
-    padding: 0 0 4.5mm;
-    text-align: center;
-  }
-
-  .print-kicker {
-    margin: 0;
-    color: #111827 !important;
-    font-size: 11.5pt;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  .print-title {
-    margin: 2.5mm 0 0;
-    color: #111827 !important;
-    font-size: 20pt;
-    font-weight: 800;
-    line-height: 1.3;
-    letter-spacing: 0.01em;
-  }
-
-  .print-subtitle {
-    margin: 2mm 0 0;
-    color: #374151 !important;
-    font-size: 16pt;
-    font-weight: 600;
-  }
-
-  .print-meta {
-    margin-top: 4mm;
-    padding: 0 1mm;
-    text-align: left;
-  }
-
-  .print-meta-line {
-    margin: 0 0 2mm;
-    color: #374151 !important;
-    font-size: 14pt;
-    font-weight: 500;
-    line-height: 1.5;
-  }
-
-  .print-meta-row {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 1.5mm 6mm;
-  }
-
-  .print-meta-row p {
-    margin: 0;
-    color: #374151 !important;
-    font-size: 14pt;
-    font-weight: 500;
-    line-height: 1.5;
-  }
-
-  /* ---- Stat strip ----
-     These four numbers are the headline data of the report, so they're
-     sized closer to a section heading than a table cell (roughly 2x the
-     old size), and the border is dark enough to survive a low-toner print. */
-
-  .print-summary {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0;
-    margin: 0 0 5mm;
-    border: 1.5px solid #374151;
-    background: #f3f4f6 !important;
-  }
-
-  .print-stat {
-    display: flex;
-    flex-direction: column;
-    gap: 1.2mm;
-    border-right: 1.5px solid #374151;
-    padding: 3.5mm 3.5mm;
-  }
-
-  .print-stat:last-child {
-    border-right: 0;
-  }
-
-  .print-stat-label {
-    color: #374151 !important;
-    font-size: 11pt;
-    font-weight: 700;
-  }
-
-  .print-stat-value {
-    color: #111827 !important;
-    font-size: 26pt;
-    font-weight: 800;
-    line-height: 1.15;
-  }
-
-  .print-stat-value small {
-    color: #374151 !important;
-    font-size: 12pt;
-    font-weight: 600;
-  }
-
-  /* ---- Table ----
-     Match the admin A4 report's font and table treatment. The cell padding
-     is one point tighter than admin (3pt/7pt instead of 4pt/8pt) so the
-     teacher report fits one additional narrow row on the page. */
-
-  .print-document table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-    font-size: 15pt;
-  }
-
-  .print-document th,
-  .print-document td {
-    border: 1pt solid #000 !important;
-    padding: 3pt 7pt;
-    color: #000 !important;
-    background: #fff !important;
-    overflow-wrap: break-word;
-    word-break: break-word;
-    vertical-align: middle;
-    line-height: 1.4;
-  }
-
-  .print-document th {
-    background: #f0f0f0 !important;
-    font-size: 15pt;
-    font-weight: 700;
-    text-align: left;
-  }
-
-  .print-cell-center {
-    text-align: center;
-  }
-
-  /* Seven columns, widths sum to 100% so nothing spills past the A4 edge. */
-  .print-document th:nth-child(1),
-  .print-document td:nth-child(1) { width: 6%; text-align: center; }
-  .print-document th:nth-child(2),
-  .print-document td:nth-child(2) { width: 15%; }
-  .print-document th:nth-child(3),
-  .print-document td:nth-child(3) { width: 24%; }
-  .print-document th:nth-child(4),
-  .print-document td:nth-child(4) { width: 9%; }
-  .print-document th:nth-child(5),
-  .print-document td:nth-child(5) { width: 13%; text-align: center; }
-  .print-document th:nth-child(6),
-  .print-document td:nth-child(6) { width: 12%; text-align: center; }
-  .print-document th:nth-child(7),
-  .print-document td:nth-child(7) { width: 21%; text-align: center; }
-
-  .print-document tr {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-
-  .print-document thead {
-    display: table-header-group;
-  }
-
-  .print-document tbody tr:nth-child(even) td {
-    background: #f3f4f6 !important;
-  }
-
-  /* ---- Performance-level indicator ----
-     Score bands used to be told apart only by a pastel background color,
-     which converges to near-identical gray on a black & white printer.
-     The dot count + bold label carry the ranking without relying on color
-     at all; color (set inline per band) is a bonus on a color printer. */
-
-  .print-level {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.8mm;
-  }
-
-  .print-level-dots {
-    display: flex;
-    gap: 0.6mm;
-  }
-
-  .print-dot {
-    width: 2.4mm;
-    height: 2.4mm;
-    border-radius: 50%;
-    border: 1px solid #111827 !important;
-    background: #fff !important;
-  }
-
-  .print-dot-filled {
-    background: #111827 !important;
-  }
-
-  .print-level-label {
-    font-size: 11.5pt;
-    font-weight: 700;
-    color: #111827 !important;
-  }
-
-  /* ---- Signature block ---- */
-
-  .print-signature {
-    display: flex;
-    justify-content: space-between;
-    gap: 10mm;
-    margin-top: 14mm;
-  }
-
-  .print-signature-box {
-    flex: 1;
-    text-align: center;
-  }
-
-  .print-signature-line {
-    margin: 0 0 2mm;
-    color: #374151 !important;
-    font-size: 14pt;
-    letter-spacing: 0.02em;
-  }
-
-  .print-signature-name {
-    margin: 0;
-    color: #111827 !important;
-    font-size: 14pt;
-    font-weight: 700;
-  }
-
-  .print-signature-role {
-    margin: 1mm 0 0;
-    color: #374151 !important;
-    font-size: 13pt;
-    font-weight: 500;
-  }
-
-  .print-signature-date {
-    margin: 3mm 0 0;
-    color: #374151 !important;
-    font-size: 13pt;
-  }
+  .print-level { display: inline-flex; flex-direction: column; align-items: center; gap: .8mm; }
+  .print-level-dots { display: flex; gap: .6mm; }
+  .print-dot { width: 2.4mm; height: 2.4mm; border-radius: 50%; border: 1px solid #000 !important; background: #fff !important; }
+  .print-dot-filled { background: #000 !important; }
+  .print-level-label { font-size: 11.5pt; font-weight: 700; color: #000 !important; }
+  .print-signature { display: flex; justify-content: space-between; gap: 10mm; margin-top: 14mm; }
+  .print-signature-box { flex: 1; text-align: center; }
+  .print-signature-line { margin: 0 0 2mm; color: #000 !important; font-size: 14pt; }
+  .print-signature-name { margin: 0; color: #000 !important; font-size: 14pt; font-weight: 700; }
+  .print-signature-role { margin: 1mm 0 0; color: #000 !important; font-size: 13pt; }
+  .print-signature-date { margin: 3mm 0 0; color: #000 !important; font-size: 13pt; }
 }
