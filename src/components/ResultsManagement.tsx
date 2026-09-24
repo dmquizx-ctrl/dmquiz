@@ -17,11 +17,13 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Users, Printer } from 'lucide-react';
 
 interface ExamOption {
   id: string;
   exam_name: string;
+  subjects: { subject_name: string } | null;
 }
 
 interface StudentInfo {
@@ -60,7 +62,7 @@ export function ResultsManagement() {
   const fetchExams = async () => {
     const { data, error } = await supabase
       .from('exams')
-      .select('id, exam_name')
+      .select('id, exam_name, subjects(subject_name)')
       .order('created_at', { ascending: false });
 
     if (error) {
