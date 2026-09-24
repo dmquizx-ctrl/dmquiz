@@ -132,7 +132,10 @@
   .print-stat-value small { font-size: 13pt; font-weight: 600; }
 
   .print-document table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 16pt; }
-  .print-document th, .print-document td { height: 13mm; border: 1.25px solid #374151 !important; padding: 2.2mm 2mm; color: #111827 !important; background: #fff !important; overflow-wrap: break-word; word-break: break-word; vertical-align: middle; line-height: 1; }
+
+  /* --- Row density fix (agreed change): padding 2.2mm -> 1.5mm, row height 13mm -> 9.5mm,
+     line-height 1 -> 1.15 so Thai upper/lower vowel marks (่ ้ ๊ ๋ ำ) don't collide. --- */
+  .print-document th, .print-document td { height: 9.5mm; border: 1.25px solid #374151 !important; padding: 1.5mm 2mm; color: #111827 !important; background: #fff !important; overflow-wrap: break-word; word-break: break-word; vertical-align: middle; line-height: 1.15; }
   .print-document th { background: #d1d5db !important; font-size: 16pt; font-weight: 700; text-align: center; }
   .print-document th:nth-child(2), .print-document td:nth-child(2), .print-document th:nth-child(4), .print-document td:nth-child(4) { text-align: center; }
   .print-cell-center { text-align: center; }
@@ -143,12 +146,13 @@
   .print-document th:nth-child(5), .print-document td:nth-child(5) { width: 13%; text-align: center; }
   .print-document th:nth-child(6), .print-document td:nth-child(6) { width: 12%; text-align: center; }
   .print-document th:nth-child(7), .print-document td:nth-child(7) { width: 21%; text-align: center; }
-  .print-document tr { height: 13mm; break-inside: avoid; page-break-inside: avoid; }
+  .print-document tr { height: 9.5mm; break-inside: avoid; page-break-inside: avoid; }
   .print-document thead { display: table-header-group; }
   .print-document tbody tr:nth-child(even) td { background: #f3f4f6 !important; }
 
-  /* Score level: compact, fixed-width colour pill without dots. */
-  .print-level { display: flex; align-items: center; justify-content: center; min-width: 110px; width: 110px; box-sizing: border-box; margin: 0 auto; padding: 4px 16px; border-radius: 20px; font-size: 16pt; font-weight: 600; line-height: 1; white-space: nowrap; }
+  /* Score level: compact, fixed-width colour pill without dots.
+     Padding trimmed slightly (4px -> 3px, 16px -> 15px) to fit the shorter 9.5mm row. */
+  .print-level { display: flex; align-items: center; justify-content: center; min-width: 110px; width: 110px; box-sizing: border-box; margin: 0 auto; padding: 3px 15px; border-radius: 20px; font-size: 16pt; font-weight: 600; line-height: 1; white-space: nowrap; }
   .print-level-dots { display: none !important; }
   .print-level-label { color: inherit !important; font-size: inherit; font-weight: inherit; line-height: inherit; }
   .print-level:has(.print-dot:nth-child(4).print-dot-filled) { background: #e8f5e9 !important; color: #2e7d32 !important; }
