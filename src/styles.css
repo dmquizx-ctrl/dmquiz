@@ -116,19 +116,19 @@
   #print-portal-root { display: block !important; }
   .print-document { display: block !important; width: 100%; margin: 0; padding: 0; background: #fff !important; color: #111827 !important; font-family: var(--font-thai-report); }
 
-  .print-header { margin: 0 0 6mm; text-align: center; }
+  .print-header { margin: 0 0 4mm; text-align: center; }
   .print-kicker { display: none; }
-  .print-title { margin: 0 0 2mm; color: #111827 !important; font-size: 22px; font-weight: 800; line-height: 1.2; }
-  .print-subtitle { margin: 0 0 2mm; color: #111827 !important; font-size: 16px; font-weight: 600; line-height: 1.35; }
-  .print-meta { margin-top: 3mm; }
-  .print-meta-line { margin: 0 0 2mm; color: #111827 !important; font-size: 14px; font-weight: 500; line-height: 1.5; }
-  .print-meta-row { display: flex; flex-wrap: nowrap; justify-content: space-between; align-items: center; gap: 6mm; border-bottom: 1.5px solid #111827; padding-bottom: 2mm; }
-  .print-meta-row p { margin: 0; color: #111827 !important; font-size: 14px; line-height: 1.4; }
-  .print-class-line { margin: 3mm 0 0; text-align: left; color: #111827 !important; font-size: 16px; font-weight: 700; }
+  .print-title { margin: 0 0 1mm; color: #111827 !important; font-size: 21px; font-weight: 800; line-height: 1.1; }
+  .print-subtitle { margin: 0 0 1mm; color: #111827 !important; font-size: 15px; font-weight: 600; line-height: 1.2; }
+  .print-meta { margin-top: 2mm; }
+  .print-meta-line { margin: 0 0 1mm; color: #111827 !important; font-size: 13px; font-weight: 500; line-height: 1.25; }
+  .print-meta-row { display: flex; flex-wrap: nowrap; justify-content: space-between; align-items: center; gap: 4mm; border-bottom: 1.25px solid #111827; padding-bottom: 1mm; }
+  .print-meta-row p { margin: 0; color: #111827 !important; font-size: 13px; line-height: 1.2; }
+  .print-class-line { margin: 2mm 0 0; text-align: left; color: #111827 !important; font-size: 15px; font-weight: 700; }
 
-  .print-document table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 14px; }
-  .print-document th, .print-document td { border: 1.25px solid #374151 !important; padding: 3.5mm 2.5mm; color: #111827 !important; background: #fff !important; overflow-wrap: break-word; word-break: break-word; vertical-align: middle; line-height: 1.35; }
-  .print-document th { background: #d1d5db !important; font-size: 12.5px; font-weight: 700; text-align: left; }
+  .print-document table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13px; }
+  .print-document th, .print-document td { border: 1.25px solid #374151 !important; padding: 2.2mm 2mm; color: #111827 !important; background: #fff !important; overflow-wrap: break-word; word-break: break-word; vertical-align: middle; line-height: 1.15; }
+  .print-document th { background: #d1d5db !important; font-size: 12px; font-weight: 700; text-align: left; }
   .print-cell-center { text-align: center; }
   .print-document th:nth-child(1), .print-document td:nth-child(1) { width: 6%; text-align: center; }
   .print-document th:nth-child(2), .print-document td:nth-child(2) { width: 15%; }
@@ -141,73 +141,22 @@
   .print-document thead { display: table-header-group; }
   .print-document tbody tr:nth-child(even) td { background: #f3f4f6 !important; }
 
-  .print-level {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1.1mm;
-    min-width: 22mm;
-    padding: 1.2mm 2.5mm;
-    border: 1px solid rgba(15, 23, 42, 0.08);
-    border-radius: 999px;
-    background: linear-gradient(180deg, #f8fafc 0%, #eff6ff 100%);
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
-  }
+  .print-level { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.35mm; min-width: 0; padding: 0.6mm 1.4mm; border: 1px solid rgba(15, 23, 42, 0.08); border-radius: 999px; background: linear-gradient(180deg, #f8fafc 0%, #eff6ff 100%); box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06); }
+  .print-level-dots { display: flex; align-items: center; justify-content: center; gap: 0.55mm; }
+  .print-dot { width: 2.2mm; height: 2.2mm; border: 1px solid rgba(15, 23, 42, 0.25); border-radius: 50%; background: #e5e7eb; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8); }
+  .print-dot-filled { background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%); border-color: #2563eb; box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.18); }
+  .print-level:has(.print-dot:nth-child(4).print-dot-filled) { background: linear-gradient(180deg, #ecfdf5 0%, #d1fae5 100%); border-color: #86efac; }
+  .print-level:has(.print-dot:nth-child(3).print-dot-filled):not(:has(.print-dot:nth-child(4).print-dot-filled)) { background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%); border-color: #93c5fd; }
+  .print-level:has(.print-dot:nth-child(2).print-dot-filled):not(:has(.print-dot:nth-child(3).print-dot-filled)) { background: linear-gradient(180deg, #fff7ed 0%, #ffedd5 100%); border-color: #fdba74; }
+  .print-level:not(:has(.print-dot.print-dot-filled)) { background: linear-gradient(180deg, #fef2f2 0%, #fee2e2 100%); border-color: #fca5a5; }
+  .print-level-label { font-size: 10.5px; font-weight: 700; letter-spacing: 0; line-height: 1; color: #111827 !important; }
 
-  .print-level-dots {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1mm;
-  }
-
-  .print-dot {
-    width: 2.8mm;
-    height: 2.8mm;
-    border: 1px solid rgba(15, 23, 42, 0.25);
-    border-radius: 50%;
-    background: #e5e7eb;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  }
-
-  .print-dot-filled {
-    background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
-    border-color: #2563eb;
-    box-shadow: 0 0 0 1.5px rgba(37, 99, 235, 0.18);
-  }
-
-  .print-level:has(.print-dot:nth-child(4).print-dot-filled) {
-    background: linear-gradient(180deg, #ecfdf5 0%, #d1fae5 100%);
-    border-color: #86efac;
-  }
-
-  .print-level:has(.print-dot:nth-child(3).print-dot-filled):not(:has(.print-dot:nth-child(4).print-dot-filled)) {
-    background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
-    border-color: #93c5fd;
-  }
-
-  .print-level:has(.print-dot:nth-child(2).print-dot-filled):not(:has(.print-dot:nth-child(3).print-dot-filled)) {
-    background: linear-gradient(180deg, #fff7ed 0%, #ffedd5 100%);
-    border-color: #fdba74;
-  }
-
-  .print-level:not(:has(.print-dot.print-dot-filled)) {
-    background: linear-gradient(180deg, #fef2f2 0%, #fee2e2 100%);
-    border-color: #fca5a5;
-  }
-
-  .print-level-label {
-    font-size: 11.5px;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-    color: #111827 !important;
-  }
-
-  .print-signature { display: flex; justify-content: space-between; gap: 10mm; margin-top: 14mm; }
+  .print-signature { display: flex; justify-content: space-between; gap: 8mm; margin-top: 9mm; }
   .print-signature-box { flex: 1; text-align: center; }
-  .print-signature-line { margin: 0 0 2mm; color: #374151 !important; font-size: 14px; letter-spacing: 0.02em; }
-  .print-signature-name { margin: 0; color: #111827 !important; font-size: 14px; font-weight: 700; }
-  .print-signature-role { margin: 1mm 0 0; color: #374151 !important; font-size: 13px; font-weight: 500; }
-  .print-signature-date { margin: 3mm 0 0; color: #374151 !important; font-size: 13px; }
+  .print-signature-line { display: flex; align-items: baseline; justify-content: center; gap: 1.5mm; margin: 0 0 1mm; color: #374151 !important; font-size: 0; line-height: 1; }
+  .print-signature-line::before { content: 'ลงชื่อ'; font-size: 13px; }
+  .print-signature-line::after { content: ''; display: inline-block; width: 30mm; border-bottom: 0.5px solid #6b7280; }
+  .print-signature-name { margin: 0; color: #111827 !important; font-size: 13px; font-weight: 700; line-height: 1.15; }
+  .print-signature-role { margin: 0.5mm 0 0; color: #374151 !important; font-size: 12px; font-weight: 500; line-height: 1.15; }
+  .print-signature-date { margin: 1.5mm 0 0; color: #374151 !important; font-size: 12px; line-height: 1.15; }
 }
