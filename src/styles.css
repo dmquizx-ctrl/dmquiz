@@ -117,24 +117,23 @@
 
   .print-header { display: flex; flex-direction: column; margin: 0 0 5mm; text-align: center; }
   .print-kicker { display: block; order: 1; margin: 0 0 1.5mm; color: #111827 !important; font-size: 24px; font-weight: 700; line-height: 1.15; }
-  .print-subtitle { order: 2; margin: 0 0 1.5mm; color: #111827 !important; font-size: 19px; font-weight: 600; line-height: 1.2; }
-  .print-title { order: 3; margin: 0 0 1.5mm; color: #555 !important; font-size: 18px; font-weight: 500; line-height: 1.25; }
+  .print-subtitle { order: 2; margin: 0 0 1.5mm; color: #111827 !important; font-size: 21px; font-weight: 500; line-height: 1.2; }
+  .print-title { order: 3; margin: 0 0 1.5mm; color: #555 !important; font-size: 20px; font-weight: 500; line-height: 1.25; }
   .print-meta { order: 4; margin-top: 2.5mm; }
-  .print-meta-line { margin: 0 0 1.2mm; color: #555 !important; font-size: 18px; font-weight: 500; line-height: 1.2; }
+  .print-meta-line { margin: 0 0 1.2mm; color: #555 !important; font-size: 20px; font-weight: 500; line-height: 1.2; }
   .print-meta-row { display: flex; flex-wrap: nowrap; justify-content: space-between; align-items: center; gap: 4mm; border-bottom: 1.25px solid #9ca3af; padding: 1.5mm 0; }
-  .print-meta-row p { margin: 0; color: #374151 !important; font-size: 18px; line-height: 1.2; }
-  .print-class-line { margin: 3.5mm 0 0; text-align: left; color: #111827 !important; font-size: 18px; font-weight: 700; line-height: 1.2; }
+  .print-meta-row p { margin: 0; color: #374151 !important; font-size: 20px; line-height: 1.2; }
+  .print-class-line { margin: 3.5mm 0 0; text-align: left; color: #111827 !important; font-size: 20px; font-weight: 700; line-height: 1.2; }
 
   .print-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3mm; margin: 0 0 6mm; border-bottom: 1px solid #d1d5db; padding-bottom: 4mm; }
   .print-stat { display: flex; flex-direction: column; justify-content: center; gap: 1mm; border: 1px solid #e5e7eb; border-radius: 4px; background: #f8f9fa !important; padding: 3mm 2.5mm; min-height: 18mm; }
-  .print-stat-label { color: #374151 !important; font-size: 18px; font-weight: 600; line-height: 1.2; }
-  .print-stat-value { color: #111827 !important; font-size: 18px; font-weight: 700; line-height: 1.2; }
-  .print-stat-value small { font-size: 15px; font-weight: 600; }
+  .print-stat-label { color: #374151 !important; font-size: 20px; font-weight: 600; line-height: 1.2; }
+  .print-stat-value { color: #111827 !important; font-size: 20px; font-weight: 700; line-height: 1.2; }
+  .print-stat-value small { font-size: 16px; font-weight: 600; }
 
-  /* Keep the report table at the requested 17px. */
-  .print-document table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 17px; }
+  .print-document table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 19px; }
   .print-document th, .print-document td { border: 1.25px solid #374151 !important; padding: 2.2mm 2mm; color: #111827 !important; background: #fff !important; overflow-wrap: break-word; word-break: break-word; vertical-align: middle; line-height: 1.15; }
-  .print-document th { background: #d1d5db !important; font-size: 17px; font-weight: 700; text-align: left; }
+  .print-document th { background: #d1d5db !important; font-size: 19px; font-weight: 700; text-align: left; }
   .print-cell-center { text-align: center; }
   .print-document th:nth-child(1), .print-document td:nth-child(1) { width: 6%; text-align: center; }
   .print-document th:nth-child(2), .print-document td:nth-child(2) { width: 15%; }
@@ -160,9 +159,9 @@
   .print-signature { display: flex; justify-content: space-between; gap: 8mm; margin-top: 42px; }
   .print-signature-box { flex: 1; text-align: center; }
   .print-signature-line { display: flex; align-items: baseline; justify-content: center; gap: 1.5mm; margin: 0 0 1mm; color: #374151 !important; font-size: 0; line-height: 1; }
-  .print-signature-line::before { content: 'ลงชื่อ'; font-size: 17px; }
+  .print-signature-line::before { content: 'ลงชื่อ'; font-size: 19px; }
   .print-signature-line::after { content: ''; display: inline-block; width: 30mm; border-bottom: 0.5px solid #6b7280; }
-  .print-signature-name { margin: 0; color: #111827 !important; font-size: 17px; font-weight: 700; line-height: 1.15; }
-  .print-signature-role { margin: 0.5mm 0 0; color: #374151 !important; font-size: 17px; font-weight: 500; line-height: 1.15; }
-  .print-signature-date { margin: 1.5mm 0 0; color: #374151 !important; font-size: 17px; line-height: 1.15; }
+  .print-signature-name { margin: 0; color: #111827 !important; font-size: 19px; font-weight: 700; line-height: 1.15; }
+  .print-signature-role { margin: 0.5mm 0 0; color: #374151 !important; font-size: 19px; font-weight: 500; line-height: 1.15; }
+  .print-signature-date { margin: 1.5mm 0 0; color: #374151 !important; font-size: 19px; line-height: 1.15; }
 }
