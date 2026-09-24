@@ -296,32 +296,6 @@ export function ResultsManagement() {
           </Select>
         </div>
 
-        <div className="min-w-[160px]">
-          <Select
-            value={selectedClass}
-            onValueChange={setSelectedClass}
-          >
-            <SelectTrigger className="bg-white">
-              <SelectValue placeholder="ทุกห้อง" />
-            </SelectTrigger>
-
-            <SelectContent>
-              <SelectItem value="all">
-                ทุกห้อง
-              </SelectItem>
-
-              {classes.map((className) => (
-                <SelectItem
-                  key={className}
-                  value={className}
-                >
-                  {className}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
         <Button
           onClick={handlePrint}
           disabled={filtered.length === 0}
