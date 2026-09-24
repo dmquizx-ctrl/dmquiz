@@ -51,6 +51,8 @@ interface ExamOption {
   subject_id: string | null;
   subject_name: string;
   grade_level: string;
+  semester: string;
+  academic_year: string;
 }
 
 interface Teacher {
@@ -245,7 +247,7 @@ function PrintReport({
           <p className="print-meta-line"><strong>รายวิชา:</strong> {exam.subject_name}</p>
           <div className="print-meta-row">
             <p><strong>ระดับชั้น:</strong> {exam.grade_level}</p>
-            <p><strong>ห้องเรียน:</strong> {className}</p>
+            <p>ภาคเรียนที่ {exam.semester || '-'} ปีการศึกษา {exam.academic_year || '-'}</p>
             <p><strong>วันที่พิมพ์:</strong> {new Date().toLocaleDateString('th-TH')}</p>
           </div>
         </div>
@@ -360,7 +362,7 @@ const ExamReport = ({ teacherId }: Props) => {
     try {
       const { data, error } = await supabase
         .from('exams')
-        .select('id, exam_name, subject_id, subjects(subject_name, grade_level)')
+        .select('id, exam_name, subject_id, subjects(subject_name, grade_level, semester, academic_year)')
         .eq('teacher_id', teacherId)
         .order('created_at', { ascending: false });
       if (error) throw error;
@@ -371,6 +373,8 @@ const ExamReport = ({ teacherId }: Props) => {
         subject_id: e.subject_id,
         subject_name: e.subjects?.subject_name || 'ไม่ระบุวิชา',
         grade_level: e.subjects?.grade_level || 'ไม่ระบุชั้น',
+        semester: e.subjects?.semester || '',
+        academic_year: e.subjects?.academic_year || '',
       }));
 
       setExams(mapped);
