@@ -294,6 +294,7 @@ export type Database = {
           grade_level: string
           id: string
           is_active: boolean
+          randomize_questions: boolean
           semester: string
           subject_category: string
           subject_code: string
@@ -307,6 +308,7 @@ export type Database = {
           grade_level: string
           id?: string
           is_active?: boolean
+          randomize_questions?: boolean
           semester: string
           subject_category?: string
           subject_code: string
@@ -320,6 +322,7 @@ export type Database = {
           grade_level?: string
           id?: string
           is_active?: boolean
+          randomize_questions?: boolean
           semester?: string
           subject_category?: string
           subject_code?: string

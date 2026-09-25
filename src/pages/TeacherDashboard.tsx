@@ -31,6 +31,7 @@ interface Subject {
   academic_year: string;
   curriculum: string;
   is_active?: boolean;
+  randomize_questions: boolean;
 }
 
 const cardColors = [
@@ -105,6 +106,43 @@ const TeacherDashboard = () => {
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: 'ไม่สามารถเปลี่ยนสถานะเปิด-ปิดวิชาได้',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleToggleQuestionRandomization = async (
+    subjectId: string,
+    currentStatus: boolean,
+  ) => {
+    const nextStatus = !currentStatus;
+    try {
+      const { error } = await supabase
+        .from('subjects')
+        .update({ randomize_questions: nextStatus })
+        .eq('id', subjectId);
+
+      if (error) throw error;
+
+      setSubjects((prev) =>
+        prev.map((subject) =>
+          subject.id === subjectId
+            ? { ...subject, randomize_questions: nextStatus }
+            : subject,
+        ),
+      );
+
+      toast({
+        title: nextStatus ? 'เปิดการสุ่มข้อสอบแล้ว' : 'ปิดการสุ่มข้อสอบแล้ว',
+        description: nextStatus
+          ? 'นักเรียนแต่ละคนจะได้รับลำดับคำถามต่างกัน'
+          : 'นักเรียนทุกคนจะได้รับลำดับคำถามตามชุดข้อสอบ',
+      });
+    } catch (error: any) {
+      console.error(error);
+      toast({
+        title: 'เกิดข้อผิดพลาด',
+        description: 'ไม่สามารถเปลี่ยนการตั้งค่าสุ่มข้อสอบได้',
         variant: 'destructive',
       });
     }
@@ -309,6 +347,27 @@ const TeacherDashboard = () => {
                                   checked={isActive}
                                   onCheckedChange={() =>
                                     handleToggleSubjectActive(subject.id, isActive)
+                                  }
+                                />
+                              </div>
+                              <div className="flex items-center justify-between gap-3 rounded-xl border bg-slate-50 px-3 py-2">
+                                <div>
+                                  <p className="text-sm font-medium">สุ่มลำดับข้อสอบ</p>
+                                  <p className="text-xs text-slate-500">
+                                    {subject.randomize_questions
+                                      ? 'นักเรียนแต่ละคนได้ลำดับต่างกัน'
+                                      : 'ทุกคนได้ลำดับเดียวกัน'}
+                                  </p>
+                                </div>
+                                <Switch
+                                  id={`randomize-${subject.id}`}
+                                  checked={subject.randomize_questions}
+                                  aria-label={`สุ่มลำดับข้อสอบ ${subject.subject_code}`}
+                                  onCheckedChange={() =>
+                                    handleToggleQuestionRandomization(
+                                      subject.id,
+                                      subject.randomize_questions,
+                                    )
                                   }
                                 />
                               </div>
