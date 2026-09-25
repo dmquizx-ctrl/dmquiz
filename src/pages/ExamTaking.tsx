@@ -31,8 +31,42 @@ interface ExamInfo {
   exam_name: string;
   duration_minutes: number;
   question_count: number;
-  subjects: { grade_level: string } | null;
+  subjects: { grade_level: string; randomize_questions: boolean } | null;
 }
+
+const createSeed = (value: string) => {
+  let seed = 2166136261;
+  for (let index = 0; index < value.length; index += 1) {
+    seed ^= value.charCodeAt(index);
+    seed = Math.imul(seed, 16777619);
+  }
+  return seed >>> 0;
+};
+
+const createSeededRandom = (initialSeed: number) => {
+  let seed = initialSeed;
+  return () => {
+    seed += 0x6d2b79f5;
+    let value = seed;
+    value = Math.imul(value ^ (value >>> 15), value | 1);
+    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+  };
+};
+
+const shuffleQuestionsForStudent = (
+  questions: ExamQuestion[],
+  studentId: string,
+  examId: string,
+) => {
+  const shuffled = [...questions];
+  const random = createSeededRandom(createSeed(`${studentId}:${examId}`));
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const targetIndex = Math.floor(random() * (index + 1));
+    [shuffled[index], shuffled[targetIndex]] = [shuffled[targetIndex], shuffled[index]];
+  }
+  return shuffled;
+};
 
 const ExamTaking = () => {
   const { examId } = useParams<{ examId: string }>();
@@ -99,7 +133,7 @@ const ExamTaking = () => {
     try {
       const { data: examData, error: examError } = await supabase
         .from('exams')
-        .select('id, exam_name, duration_minutes, question_count, subject_id, teacher_id, subjects(grade_level)')
+        .select('id, exam_name, duration_minutes, question_count, subject_id, teacher_id, subjects(grade_level, randomize_questions)')
         .eq('id', examId!)
         .eq('is_active', true)
         .single();
@@ -176,7 +210,13 @@ const ExamTaking = () => {
         return;
       }
 
-      setQuestions((questionsData as any) || []);
+      const loadedQuestions = (questionsData as unknown as ExamQuestion[]) || [];
+      const shouldRandomize = (examData.subjects as ExamInfo['subjects'])?.randomize_questions;
+      setQuestions(
+        shouldRandomize
+          ? shuffleQuestionsForStudent(loadedQuestions, user!.id, examId!)
+          : loadedQuestions,
+      );
 
       if (storageKeyRef.current) {
         try {
