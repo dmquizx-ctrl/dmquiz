@@ -26,6 +26,7 @@ interface Subject {
   id: string;
   subject_code: string;
   subject_name: string;
+  subject_category?: string | null;
   grade_level: string;
   semester: string;
   academic_year: string;
@@ -33,13 +34,6 @@ interface Subject {
   is_active?: boolean;
   randomize_questions: boolean;
 }
-
-const cardColors = [
-  'from-blue-500 to-cyan-400',
-  'from-violet-500 to-purple-500',
-  'from-emerald-500 to-teal-400',
-  'from-amber-400 to-orange-500',
-];
 
 const TeacherDashboard = () => {
   const { user, logout } = useAuth();
