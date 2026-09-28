@@ -35,6 +35,16 @@ interface Subject {
   randomize_questions: boolean;
 }
 
+const GRADE_ORDER = ['ป.1', 'ป.2', 'ป.3', 'ป.4', 'ป.5', 'ป.6'];
+
+const sortSubjectsByGrade = (list: Subject[]) =>
+  [...list].sort((a, b) => {
+    const gradeDiff =
+      GRADE_ORDER.indexOf(a.grade_level) - GRADE_ORDER.indexOf(b.grade_level);
+    if (gradeDiff !== 0) return gradeDiff;
+    return a.subject_code.localeCompare(b.subject_code, 'th');
+  });
+
 const TeacherDashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
