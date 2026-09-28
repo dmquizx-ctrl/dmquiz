@@ -51,6 +51,7 @@ const TeacherDashboard = () => {
   const { toast } = useToast();
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user || user.userType !== 'teacher') {
