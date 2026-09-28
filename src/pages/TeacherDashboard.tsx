@@ -10,8 +10,6 @@ import { supabase } from '@/integrations/supabase/client';
 import {
   BookOpen,
   LogOut,
-  Eye,
-  EyeOff,
   GraduationCap,
   Sparkles,
   Upload,
@@ -26,6 +24,7 @@ interface Subject {
   id: string;
   subject_code: string;
   subject_name: string;
+  subject_category?: string | null;
   grade_level: string;
   semester: string;
   academic_year: string;
@@ -34,12 +33,15 @@ interface Subject {
   randomize_questions: boolean;
 }
 
-const cardColors = [
-  'from-blue-500 to-cyan-400',
-  'from-violet-500 to-purple-500',
-  'from-emerald-500 to-teal-400',
-  'from-amber-400 to-orange-500',
-];
+const GRADE_ORDER = ['ป.1', 'ป.2', 'ป.3', 'ป.4', 'ป.5', 'ป.6'];
+
+const sortSubjectsByGrade = (list: Subject[]) =>
+  [...list].sort((a, b) => {
+    const gradeDiff =
+      GRADE_ORDER.indexOf(a.grade_level) - GRADE_ORDER.indexOf(b.grade_level);
+    if (gradeDiff !== 0) return gradeDiff;
+    return a.subject_code.localeCompare(b.subject_code, 'th');
+  });
 
 const TeacherDashboard = () => {
   const { user, logout } = useAuth();
@@ -47,6 +49,7 @@ const TeacherDashboard = () => {
   const { toast } = useToast();
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user || user.userType !== 'teacher') {
@@ -170,6 +173,20 @@ const TeacherDashboard = () => {
   const tabClass =
     'gap-2 rounded-xl border border-transparent bg-white/60 py-3 text-sm font-medium text-slate-600 shadow-sm transition-all hover:bg-slate-50 data-[state=active]:!text-white data-[state=active]:!shadow-md';
 
+  const categories = Array.from(
+    new Set(subjects.map((subject) => subject.subject_category || 'อื่น ๆ')),
+  );
+  const selectedCategory = activeCategory ?? categories[0] ?? null;
+  const categorySubjects = sortSubjectsByGrade(
+    subjects.filter((subject) => (subject.subject_category || 'อื่น ๆ') === selectedCategory),
+  );
+  const gradeGroups = categorySubjects.reduce<[string, Subject[]][]>((groups, subject) => {
+    const group = groups.find(([grade]) => grade === subject.grade_level);
+    if (group) group[1].push(subject);
+    else groups.push([subject.grade_level, [subject]]);
+    return groups;
+  }, []);
+
   return (
     <div className="page-shell">
       {/* Header */}
@@ -284,118 +301,134 @@ const TeacherDashboard = () => {
                     รายวิชาที่สอน
                   </CardTitle>
                   <CardDescription>
-                    เปิดหรือซ่อนรายวิชาให้นักเรียนเห็นได้ตามต้องการ
+                    แบ่งตามหมวดวิชาและระดับชั้น เปิดหรือซ่อนรายวิชาให้นักเรียนเห็นได้ตามต้องการ
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="px-0">
+                <CardContent className="px-0 space-y-5">
                   {subjects.length === 0 ? (
                     <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 py-10 text-center text-slate-500">
                       ยังไม่มีรายวิชาที่ได้รับมอบหมาย
                     </div>
                   ) : (
-                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                      {subjects.map((subject, index) => {
-                        const isActive = subject.is_active ?? true;
-                        return (
-                          <Card
-                            key={subject.id}
-                            className="overflow-hidden border border-slate-200/80 bg-white shadow-sm hover:-translate-y-0.5 hover:shadow-md"
-                          >
-                            <div
-                              className={`h-2 bg-gradient-to-r ${
-                                cardColors[index % cardColors.length]
+                    <>
+                      <div className="flex flex-wrap gap-2 rounded-xl bg-slate-100 p-1.5">
+                        {categories.map((category) => {
+                          const count = subjects.filter(
+                            (subject) => (subject.subject_category || 'อื่น ๆ') === category,
+                          ).length;
+                          const isSelected = selectedCategory === category;
+                          return (
+                            <button
+                              key={category}
+                              type="button"
+                              onClick={() => setActiveCategory(category)}
+                              className={`flex-1 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-all sm:flex-none sm:px-4 ${
+                                isSelected
+                                  ? 'bg-white text-blue-600 shadow-sm'
+                                  : 'text-slate-500 hover:text-slate-700'
                               }`}
-                            />
-                            <CardHeader className="pb-3">
-                              <div className="flex items-start justify-between gap-3">
-                                <div>
-                                  <CardTitle className="text-lg">
-                                    {subject.subject_code}
-                                  </CardTitle>
-                                  <CardDescription>{subject.subject_name}</CardDescription>
-                                </div>
-                                <span
-                                  className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-                                    isActive
-                                      ? 'bg-emerald-100 text-emerald-700'
-                                      : 'bg-slate-200 text-slate-600'
-                                  }`}
-                                >
-                                  {isActive ? 'เปิดใช้งาน' : 'ซ่อน'}
-                                </span>
-                              </div>
-                            </CardHeader>
-                            <CardContent className="space-y-3">
-                              <div className="space-y-2 text-sm text-slate-600">
-                                <p>
-                                  <b>ชั้น:</b> {subject.grade_level}
-                                </p>
-                                <p>
-                                  <b>ภาคเรียน:</b> {subject.semester}
-                                </p>
-                                <p>
-                                  <b>ปีการศึกษา:</b> {subject.academic_year}
-                                </p>
-                                <p>
-                                  <b>หลักสูตร:</b> {subject.curriculum}
-                                </p>
-                              </div>
-                              <div className="flex items-center justify-between rounded-xl border bg-slate-50 px-3 py-2">
-                                <span className="text-sm">แสดงให้นักเรียนเห็น</span>
-                                <Switch
-                                  id={`active-${subject.id}`}
-                                  checked={isActive}
-                                  onCheckedChange={() =>
-                                    handleToggleSubjectActive(subject.id, isActive)
-                                  }
-                                />
-                              </div>
-                              <div className="flex items-center justify-between gap-3 rounded-xl border bg-slate-50 px-3 py-2">
-                                <div>
-                                  <p className="text-sm font-medium">สุ่มลำดับข้อสอบ</p>
-                                  <p className="text-xs text-slate-500">
-                                    {subject.randomize_questions
-                                      ? 'นักเรียนแต่ละคนได้ลำดับต่างกัน'
-                                      : 'ทุกคนได้ลำดับเดียวกัน'}
-                                  </p>
-                                </div>
-                                <Switch
-                                  id={`randomize-${subject.id}`}
-                                  checked={subject.randomize_questions}
-                                  aria-label={`สุ่มลำดับข้อสอบ ${subject.subject_code}`}
-                                  onCheckedChange={() =>
-                                    handleToggleQuestionRandomization(
-                                      subject.id,
-                                      subject.randomize_questions,
-                                    )
-                                  }
-                                />
-                              </div>
-                              <div className="flex items-center justify-between border-t pt-2 text-xs">
-                                <span className="text-slate-500">สถานะ</span>
-                                <span
-                                  className={`flex items-center gap-1 font-semibold ${
-                                    isActive ? 'text-emerald-600' : 'text-slate-500'
-                                  }`}
-                                >
-                                  {isActive ? (
-                                    <>
-                                      <Eye className="h-3.5 w-3.5" />
-                                      แสดงผล
-                                    </>
-                                  ) : (
-                                    <>
-                                      <EyeOff className="h-3.5 w-3.5" />
-                                      ซ่อน
-                                    </>
-                                  )}
-                                </span>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
-                    </div>
+                            >
+                              {category}
+                              <span
+                                className={`ml-2 rounded-full px-1.5 py-0.5 text-[10px] ${
+                                  isSelected ? 'bg-blue-50 text-blue-600' : 'bg-slate-200 text-slate-500'
+                                }`}
+                              >
+                                {count}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {gradeGroups.length === 0 ? (
+                        <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 py-8 text-center text-slate-500">
+                          ไม่พบรายวิชาในหมวดนี้
+                        </div>
+                      ) : (
+                        gradeGroups.map(([grade, list], groupIndex) => (
+                          <section key={grade} className="space-y-3">
+                            <div
+                              className={`flex items-center justify-between pt-4 ${
+                                groupIndex > 0 ? 'border-t border-slate-200' : ''
+                              }`}
+                            >
+                              <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">
+                                ระดับชั้น {grade}
+                              </h2>
+                              <span className="rounded-full bg-slate-200 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+                                {list.length} วิชา
+                              </span>
+                            </div>
+                            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                              {list.map((subject) => {
+                                const isActive = subject.is_active ?? true;
+                                return (
+                                  <Card
+                                    key={subject.id}
+                                    className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+                                  >
+                                    <div className="space-y-1.5 border-b border-slate-100 p-3">
+                                      <div className="flex items-start justify-between gap-2">
+                                        <span className="inline-block rounded bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700">
+                                          {subject.subject_code}
+                                        </span>
+                                        <span
+                                          className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                                            isActive
+                                              ? 'bg-emerald-50 text-emerald-600'
+                                              : 'bg-slate-200 text-slate-500'
+                                          }`}
+                                        >
+                                          <span
+                                            className={`h-1.5 w-1.5 rounded-full ${
+                                              isActive ? 'bg-emerald-500' : 'bg-slate-400'
+                                            }`}
+                                          />
+                                          {isActive ? 'เปิดใช้งาน' : 'ซ่อน'}
+                                        </span>
+                                      </div>
+                                      <h3 className="text-sm font-semibold leading-tight text-slate-900">
+                                        {subject.subject_name}
+                                      </h3>
+                                      <p className="text-[11px] text-slate-500">
+                                        ภาคเรียน {subject.semester} • ปีการศึกษา {subject.academic_year} • หลักสูตร {subject.curriculum}
+                                      </p>
+                                    </div>
+                                    <div className="flex items-stretch divide-x divide-slate-200 bg-slate-50/70 px-2.5 py-2">
+                                      <div className="flex flex-1 items-center justify-between gap-2 pr-3">
+                                        <span className="text-[11px] text-slate-600">แสดงนักเรียน</span>
+                                        <Switch
+                                          id={`active-${subject.id}`}
+                                          checked={isActive}
+                                          onCheckedChange={() =>
+                                            handleToggleSubjectActive(subject.id, isActive)
+                                          }
+                                        />
+                                      </div>
+                                      <div className="flex flex-1 items-center justify-between gap-2 pl-3">
+                                        <span className="text-[11px] text-slate-600">สุ่มข้อสอบ</span>
+                                        <Switch
+                                          id={`randomize-${subject.id}`}
+                                          checked={subject.randomize_questions}
+                                          aria-label={`สุ่มลำดับข้อสอบ ${subject.subject_code}`}
+                                          onCheckedChange={() =>
+                                            handleToggleQuestionRandomization(
+                                              subject.id,
+                                              subject.randomize_questions,
+                                            )
+                                          }
+                                        />
+                                      </div>
+                                    </div>
+                                  </Card>
+                                );
+                              })}
+                            </div>
+                          </section>
+                        ))
+                      )}
+                    </>
                   )}
                 </CardContent>
               </div>
