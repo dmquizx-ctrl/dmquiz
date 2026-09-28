@@ -175,6 +175,20 @@ const TeacherDashboard = () => {
   const tabClass =
     'gap-2 rounded-xl border border-transparent bg-white/60 py-3 text-sm font-medium text-slate-600 shadow-sm transition-all hover:bg-slate-50 data-[state=active]:!text-white data-[state=active]:!shadow-md';
 
+  const categories = Array.from(
+    new Set(subjects.map((subject) => subject.subject_category || 'อื่น ๆ')),
+  );
+  const selectedCategory = activeCategory ?? categories[0] ?? null;
+  const categorySubjects = sortSubjectsByGrade(
+    subjects.filter((subject) => (subject.subject_category || 'อื่น ๆ') === selectedCategory),
+  );
+  const gradeGroups = categorySubjects.reduce<[string, Subject[]][]>((groups, subject) => {
+    const group = groups.find(([grade]) => grade === subject.grade_level);
+    if (group) group[1].push(subject);
+    else groups.push([subject.grade_level, [subject]]);
+    return groups;
+  }, []);
+
   return (
     <div className="page-shell">
       {/* Header */}
