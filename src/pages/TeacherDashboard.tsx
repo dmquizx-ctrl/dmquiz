@@ -10,8 +10,6 @@ import { supabase } from '@/integrations/supabase/client';
 import {
   BookOpen,
   LogOut,
-  Eye,
-  EyeOff,
   GraduationCap,
   Sparkles,
   Upload,
