@@ -35,6 +35,20 @@ interface Subject {
 
 const GRADE_ORDER = ['ป.1', 'ป.2', 'ป.3', 'ป.4', 'ป.5', 'ป.6'];
 
+// Bright, category-coded accents used for the color bar and code chip on each subject card.
+const CATEGORY_THEMES = [
+  { bar: 'from-blue-400 to-indigo-500', chip: 'bg-blue-50 text-blue-600', heading: 'from-blue-400 to-indigo-500' },
+  { bar: 'from-orange-400 to-rose-400', chip: 'bg-orange-50 text-orange-600', heading: 'from-orange-400 to-rose-400' },
+  { bar: 'from-emerald-400 to-teal-500', chip: 'bg-emerald-50 text-emerald-600', heading: 'from-emerald-400 to-teal-500' },
+  { bar: 'from-violet-400 to-fuchsia-500', chip: 'bg-violet-50 text-violet-600', heading: 'from-violet-400 to-fuchsia-500' },
+  { bar: 'from-amber-400 to-orange-500', chip: 'bg-amber-50 text-amber-600', heading: 'from-amber-400 to-orange-500' },
+  { bar: 'from-cyan-400 to-sky-500', chip: 'bg-cyan-50 text-cyan-600', heading: 'from-cyan-400 to-sky-500' },
+] as const;
+
+const themeForCategory = (categories: string[], category: string) =>
+  CATEGORY_THEMES[Math.max(0, categories.indexOf(category)) % CATEGORY_THEMES.length];
+
+
 const sortSubjectsByGrade = (list: Subject[]) =>
   [...list].sort((a, b) => {
     const gradeDiff =
