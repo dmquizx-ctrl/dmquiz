@@ -360,20 +360,28 @@ const TeacherDashboard = () => {
                           ไม่พบรายวิชาในหมวดนี้
                         </div>
                       ) : (
-                        gradeGroups.map(([grade, list], groupIndex) => (
+                        gradeGroups.map(([grade, list], groupIndex) => {
+                          const theme = themeForCategory(categories, selectedCategory || '');
+                          return (
                           <section key={grade} className="space-y-3">
                             <div
                               className={`flex items-center justify-between pt-4 ${
                                 groupIndex > 0 ? 'border-t border-slate-200' : ''
                               }`}
                             >
-                              <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">
-                                ระดับชั้น {grade}
-                              </h2>
-                              <span className="rounded-full bg-slate-200 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className={`h-4 w-1 rounded-full bg-gradient-to-b ${theme.heading}`}
+                                />
+                                <h2 className="text-sm font-bold tracking-wide text-slate-600">
+                                  ระดับชั้น {grade}
+                                </h2>
+                              </div>
+                              <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-500">
                                 {list.length} วิชา
                               </span>
                             </div>
+
                             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                               {list.map((subject) => {
                                 const isActive = subject.is_active ?? true;
