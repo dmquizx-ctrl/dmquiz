@@ -22,6 +22,7 @@ import {
   PenLine,
   Printer,
   RotateCcw,
+  Scale,
   Trophy,
   UserX,
   Users,
@@ -361,6 +362,7 @@ const ExamReport = ({ teacherId }: Props) => {
   const [resettingId, setResettingId] = useState<string | null>(null);
   const [resetTarget, setResetTarget] = useState<ExamResult | null>(null);
   const [capRetake, setCapRetake] = useState(false);
+  const [adjustingId, setAdjustingId] = useState<string | null>(null);
 
   // --- Report signatures: who prepared it, and the school director's name ---
   const [teachers, setTeachers] = useState<Teacher[]>([]);
@@ -544,6 +546,28 @@ const ExamReport = ({ teacherId }: Props) => {
       toast({ title: 'รีเซ็ตไม่สำเร็จ', description: error.message, variant: 'destructive' });
     } finally {
       setResettingId(null);
+    }
+  };
+
+  // ปรับคะแนนด้วยมือ: ลดคะแนนที่เกิน 50% ให้เหลือ 50% ของคะแนนเต็ม
+  const handleAdjustTo50 = async (result: ExamResult) => {
+    const studentName = result.students ? `${result.students.first_name} ${result.students.last_name}` : 'นักเรียนคนนี้';
+    const half = Number(result.total_questions) * 0.5;
+    const confirmed = window.confirm(
+      `ปรับคะแนนของ ${studentName} จาก ${result.score}/${result.total_questions} เป็น ${half}/${result.total_questions} (50%) หรือไม่?`
+    );
+    if (!confirmed) return;
+
+    setAdjustingId(result.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('adjust-exam-score', { body: { result_id: result.id } });
+      if (error || !data?.success) throw error || new Error(data?.error || 'ไม่สามารถปรับคะแนนได้');
+      toast({ title: data.changed ? `ปรับคะแนนเป็น ${data.score}/${data.total_questions} แล้ว` : 'คะแนนไม่เกิน 50% อยู่แล้ว' });
+      await fetchResults();
+    } catch (error: any) {
+      toast({ title: 'ปรับคะแนนไม่สำเร็จ', description: error.message, variant: 'destructive' });
+    } finally {
+      setAdjustingId(null);
     }
   };
 
@@ -802,6 +826,21 @@ const ExamReport = ({ teacherId }: Props) => {
                         <ScoreBadge percentage={percentage} />
                       </TableCell>
                       <TableCell className="text-center">
+                        <div className="flex flex-wrap items-center justify-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-amber-300 text-amber-700 hover:bg-amber-50"
+                          disabled={adjustingId === result.id || Number(result.score) <= Number(result.total_questions) * 0.5}
+                          onClick={() => handleAdjustTo50(result)}
+                        >
+                          {adjustingId === result.id ? (
+                            <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Scale className="mr-1 h-3.5 w-3.5" />
+                          )}
+                          ปรับเป็น 50%
+                        </Button>
                         <Button size="sm" variant="outline" disabled={resettingId === result.id} onClick={() => openResetDialog(result)}>
                           {resettingId === result.id ? (
                             <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
@@ -810,6 +849,7 @@ const ExamReport = ({ teacherId }: Props) => {
                           )}
                           ให้ทำใหม่
                         </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
