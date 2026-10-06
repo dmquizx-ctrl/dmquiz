@@ -21,6 +21,7 @@ import {
   Printer,
   RotateCcw,
   Trophy,
+  UserX,
   Users,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -230,17 +231,23 @@ function PrintReport({
   stats,
   preparerName,
   directorName,
+  failingOnly,
 }: {
   exam: ExamOption;
   results: ExamResult[];
   stats: ReportStats;
   preparerName: string;
   directorName: string;
+  failingOnly: boolean;
 }) {
   return (
     <div className="print-document">
       <header className="print-header">
-        <p className="print-kicker">รายงานผลการประเมินผลสัมฤทธิ์ทางการเรียน</p>
+        <p className="print-kicker">
+          {failingOnly
+            ? 'รายงานรายชื่อนักเรียนที่สอบไม่ผ่าน (คะแนนต่ำกว่าร้อยละ 50)'
+            : 'รายงานผลการประเมินผลสัมฤทธิ์ทางการเรียน'}
+        </p>
         <div className="print-meta">
           <p className="print-meta-line"><strong>รายวิชา:</strong> {exam.subject_name}</p>
           <div className="print-meta-row">
@@ -253,7 +260,7 @@ function PrintReport({
 
       <div className="print-summary">
         <div className="print-stat">
-          <span className="print-stat-label">นักเรียนที่มีผลคะแนน</span>
+          <span className="print-stat-label">{failingOnly ? 'นักเรียนที่สอบไม่ผ่าน' : 'นักเรียนที่มีผลคะแนน'}</span>
           <span className="print-stat-value">{results.length} คน</span>
         </div>
         <div className="print-stat">
@@ -265,8 +272,14 @@ function PrintReport({
           <span className="print-stat-value">{stats.highest}% / {stats.lowest}%</span>
         </div>
         <div className="print-stat">
-          <span className="print-stat-label">ผ่านเกณฑ์ (≥50%)</span>
-          <span className="print-stat-value">{stats.passRate}% <small>({stats.passCount}/{results.length} คน)</small></span>
+          <span className="print-stat-label">{failingOnly ? 'เกณฑ์ผ่าน' : 'ผ่านเกณฑ์ (≥50%)'}</span>
+          <span className="print-stat-value">
+            {failingOnly ? (
+              'ร้อยละ 50 ขึ้นไป'
+            ) : (
+              <>{stats.passRate}% <small>({stats.passCount}/{results.length} คน)</small></>
+            )}
+          </span>
         </div>
       </div>
 
@@ -340,6 +353,7 @@ const ExamReport = ({ teacherId }: Props) => {
   const [selectedGrade, setSelectedGrade] = useState('');
   const [selectedExam, setSelectedExam] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('name');
+  const [showFailingOnly, setShowFailingOnly] = useState(false);
   const [loadingExams, setLoadingExams] = useState(false);
   const [loadingResults, setLoadingResults] = useState(false);
   const [resettingId, setResettingId] = useState<string | null>(null);
@@ -447,7 +461,14 @@ const ExamReport = ({ teacherId }: Props) => {
     [exams, selectedSubject, selectedGrade],
   );
 
-  const filteredResults = results;
+  // Failing = score below 50%. Kept as a memo so the table, stats, chart and
+  // print sheet all agree on the same row set.
+  const failingResults = useMemo(
+    () => results.filter((r) => toPercentage(r.score, r.total_questions) < 50),
+    [results],
+  );
+
+  const filteredResults = showFailingOnly ? failingResults : results;
 
   const sortedResults = useMemo(() => {
     const rows = [...filteredResults];
@@ -460,8 +481,10 @@ const ExamReport = ({ teacherId }: Props) => {
   const printResults = useMemo(() => [...filteredResults].sort(compareStudents), [filteredResults]);
 
   const currentExam = exams.find((e) => e.id === selectedExam);
-  const totalQuestions = filteredResults[0]?.total_questions ?? 0;
-  const stats = useMemo(() => computeStats(filteredResults), [filteredResults]);
+  const totalQuestions = results[0]?.total_questions ?? 0;
+  // Stats always describe the whole class; the failing-only toggle only
+  // narrows the table rows and the printed name list.
+  const stats = useMemo(() => computeStats(results), [results]);
 
   const usingCustomPreparer = selectedTeacherId === CUSTOM_TEACHER || !teachers.length;
   const preparerName = useMemo(() => {
@@ -594,15 +617,21 @@ const ExamReport = ({ teacherId }: Props) => {
         )}
 
         {selectedExam && stats && (
-          <div className="grid grid-cols-2 gap-3 print-controls sm:grid-cols-4">
-            <StatCard icon={Users} label="นักเรียนที่สอบ" value={String(filteredResults.length)} />
+          <div className="grid grid-cols-2 gap-3 print-controls sm:grid-cols-5">
+            <StatCard icon={Users} label="นักเรียนที่สอบ" value={String(results.length)} />
             <StatCard icon={BarChart3} label="คะแนนเฉลี่ย" value={stats.averageScore} hint={`/ ${totalQuestions}`} />
             <StatCard icon={Trophy} label="คะแนนสูงสุด - ต่ำสุด" value={`${stats.highest}% - ${stats.lowest}%`} />
             <StatCard
               icon={CheckCircle2}
               label="ผ่านเกณฑ์ (≥50%)"
-              value={`${stats.passRate}%`}
-              hint={`(${stats.passCount}/${filteredResults.length} คน)`}
+              value={String(results.length - failingResults.length)}
+              hint={`จาก ${results.length} คน`}
+            />
+            <StatCard
+              icon={UserX}
+              label="สอบไม่ผ่าน (<50%)"
+              value={String(failingResults.length)}
+              hint={`จาก ${results.length} คน`}
             />
           </div>
         )}
@@ -667,6 +696,16 @@ const ExamReport = ({ teacherId }: Props) => {
             </div>
             <div className="flex w-full flex-wrap gap-2 sm:w-auto">
               <Button
+                variant={showFailingOnly ? 'default' : 'outline'}
+                className={showFailingOnly ? 'bg-rose-600 hover:bg-rose-700' : 'border-rose-300 text-rose-700 hover:bg-rose-50'}
+                onClick={() => setShowFailingOnly((v) => !v)}
+                title="แสดงเฉพาะนักเรียนที่ได้คะแนนต่ำกว่า 50%"
+              >
+                <UserX className="mr-2 h-4 w-4" />
+                คนสอบไม่ผ่าน ({failingResults.length})
+              </Button>
+
+              <Button
                 variant="outline"
                 onClick={() => setSortKey((key) => (key === 'name' ? 'score' : 'name'))}
                 title={sortKey === 'name' ? 'เรียงตามชื่อ - กดเพื่อเรียงตามคะแนน' : 'เรียงตามคะแนน - กดเพื่อเรียงตามชื่อ'}
@@ -677,7 +716,7 @@ const ExamReport = ({ teacherId }: Props) => {
 
               <Button disabled={!filteredResults.length} onClick={() => window.print()}>
                 <Printer className="mr-2 h-4 w-4" />
-                พิมพ์รายงานคะแนน (A4)
+                {showFailingOnly ? 'พิมพ์รายงานคนสอบไม่ผ่าน (A4)' : 'พิมพ์รายงานคะแนน (A4)'}
               </Button>
             </div>
           </div>
@@ -696,6 +735,7 @@ const ExamReport = ({ teacherId }: Props) => {
                 stats={stats}
                 preparerName={preparerName}
                 directorName={directorName}
+                failingOnly={showFailingOnly}
               />
             </div>,
             document.body,
@@ -709,7 +749,10 @@ const ExamReport = ({ teacherId }: Props) => {
         )}
         {!loadingResults && !selectedExam && <EmptyState icon={FileText} message="กรุณาเลือกชุดข้อสอบ" />}
         {!loadingResults && selectedExam && !filteredResults.length && (
-          <EmptyState icon={Users} message="ยังไม่มีผลคะแนนในข้อมูลที่เลือก" />
+          <EmptyState
+            icon={showFailingOnly ? CheckCircle2 : Users}
+            message={showFailingOnly ? 'ไม่มีนักเรียนที่สอบไม่ผ่าน ทุกคนผ่านเกณฑ์ 50% แล้ว' : 'ยังไม่มีผลคะแนนในข้อมูลที่เลือก'}
+          />
         )}
 
         {!loadingResults && sortedResults.length > 0 && (
