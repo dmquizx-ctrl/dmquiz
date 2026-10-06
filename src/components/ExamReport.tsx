@@ -615,15 +615,21 @@ const ExamReport = ({ teacherId }: Props) => {
         )}
 
         {selectedExam && stats && (
-          <div className="grid grid-cols-2 gap-3 print-controls sm:grid-cols-4">
-            <StatCard icon={Users} label="นักเรียนที่สอบ" value={String(filteredResults.length)} />
+          <div className="grid grid-cols-2 gap-3 print-controls sm:grid-cols-5">
+            <StatCard icon={Users} label="นักเรียนที่สอบ" value={String(results.length)} />
             <StatCard icon={BarChart3} label="คะแนนเฉลี่ย" value={stats.averageScore} hint={`/ ${totalQuestions}`} />
             <StatCard icon={Trophy} label="คะแนนสูงสุด - ต่ำสุด" value={`${stats.highest}% - ${stats.lowest}%`} />
             <StatCard
               icon={CheckCircle2}
               label="ผ่านเกณฑ์ (≥50%)"
-              value={`${stats.passRate}%`}
-              hint={`(${stats.passCount}/${filteredResults.length} คน)`}
+              value={String(results.length - failingResults.length)}
+              hint={`จาก ${results.length} คน`}
+            />
+            <StatCard
+              icon={UserX}
+              label="สอบไม่ผ่าน (<50%)"
+              value={String(failingResults.length)}
+              hint={`จาก ${results.length} คน`}
             />
           </div>
         )}
