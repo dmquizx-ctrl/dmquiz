@@ -82,6 +82,7 @@ const ExamTaking = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<{ score: number; total_questions: number } | null>(null);
+  const [retakeCapAt50, setRetakeCapAt50] = useState(false);
 
   // โหมดบังคับเต็มหน้าจอ (Anti-Cheating State)
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -112,6 +113,11 @@ const ExamTaking = () => {
       // localStorage may be unavailable
     }
   }, [answers]);
+
+  const getRetakeCapStorageKey = useCallback(() => {
+    if (!user?.id || !examId) return null;
+    return `examRetakeCap:${user.id}:${examId}`;
+  }, [user?.id, examId]);
 
   useEffect(() => {
     let isMounted = true;
@@ -236,6 +242,39 @@ const ExamTaking = () => {
     }
   };
 
+  const handleRetakeExam = useCallback(async () => {
+    if (!user || !examId) return;
+
+    try {
+      setSubmitting(true);
+
+      const retakeCapKey = getRetakeCapStorageKey();
+      if (retakeCapAt50 && retakeCapKey) {
+        localStorage.setItem(retakeCapKey, 'true');
+      } else if (retakeCapKey) {
+        localStorage.removeItem(retakeCapKey);
+      }
+
+      const { data, error } = await supabase.functions.invoke('reset-exam-result', {
+        body: { student_id: user.id, exam_id: examId },
+      });
+
+      if (error || !data?.success) {
+        throw new Error(data?.error || 'ไม่สามารถรีเซ็ตผลสอบได้');
+      }
+
+      window.location.href = `/exam/${examId}`;
+    } catch (error: any) {
+      console.error('Retake exam error:', error);
+      toast({
+        title: error.message || 'ไม่สามารถให้สอบใหม่ได้',
+        variant: 'destructive',
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  }, [examId, getRetakeCapStorageKey, retakeCapAt50, toast, user]);
+
   const handleSubmit = useCallback(async () => {
     if (submittingRef.current || resultRef.current) return;
     submittingRef.current = true;
@@ -243,11 +282,18 @@ const ExamTaking = () => {
 
     const maxAttempts = 3;
     let lastError: any = null;
+    const retakeCapKey = getRetakeCapStorageKey();
+    const capAt50Percent = retakeCapKey ? localStorage.getItem(retakeCapKey) === 'true' : false;
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
         const response = await supabase.functions.invoke('submit-exam', {
-          body: { student_id: user!.id, exam_id: examId, answers: answersRef.current }
+          body: {
+            student_id: user!.id,
+            exam_id: examId,
+            answers: answersRef.current,
+            cap_at_50_percent: capAt50Percent,
+          }
         });
 
         if (response.error) throw response.error;
@@ -256,6 +302,10 @@ const ExamTaking = () => {
 
         setResult({ score: data.score, total_questions: data.total_questions });
         toast({ title: `ส่งข้อสอบสำเร็จ! ได้ ${data.score}/${data.total_questions} คะแนน` });
+
+        if (retakeCapKey) {
+          try { localStorage.removeItem(retakeCapKey); } catch {}
+        }
 
         if (storageKeyRef.current) {
           try { localStorage.removeItem(storageKeyRef.current); } catch {}
@@ -285,7 +335,7 @@ const ExamTaking = () => {
 
     submittingRef.current = false;
     setSubmitting(false);
-  }, [examId, user, toast]);
+  }, [examId, getRetakeCapStorageKey, toast, user]);
 
   // ฟังก์ชันสลับเข้าสู่โหมดเต็มหน้าจอ (Full Screen Request)
   const handleStartExamFullScreen = () => {
@@ -435,6 +485,8 @@ const ExamTaking = () => {
 
   if (result) {
     const percentage = Math.round((result.score / result.total_questions) * 100);
+    const didNotPass = percentage < 50;
+
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-secondary/10 to-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md shadow-lg">
@@ -446,9 +498,34 @@ const ExamTaking = () => {
             <p className="text-lg font-medium">{exam?.exam_name}</p>
             <div className="text-5xl font-bold text-primary">{result.score}/{result.total_questions}</div>
             <p className="text-muted-foreground">คิดเป็น {percentage}%</p>
-            <Button onClick={() => navigate('/student')} className="w-full mt-4">
-              กลับหน้าหลัก
-            </Button>
+
+            {didNotPass && (
+              <label className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-left text-sm text-amber-900">
+                <input
+                  type="checkbox"
+                  checked={retakeCapAt50}
+                  onChange={(event) => setRetakeCapAt50(event.target.checked)}
+                  className="mt-1 h-4 w-4 accent-amber-600"
+                />
+                <span>กรณีสอบใหม่ ให้คะแนนไม่เกิน 50% หากทำคะแนนเกิน 50%</span>
+              </label>
+            )}
+
+            <div className="grid grid-cols-1 gap-3 pt-2 sm:grid-cols-2">
+              <Button onClick={() => navigate('/student')} className="w-full">
+                กลับหน้าหลัก
+              </Button>
+
+              {didNotPass && (
+                <Button
+                  onClick={handleRetakeExam}
+                  className="w-full bg-amber-600 hover:bg-amber-500"
+                  disabled={submitting}
+                >
+                  {submitting ? 'กำลังให้สอบใหม่...' : 'ให้สอบใหม่'}
+                </Button>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -469,7 +546,7 @@ const ExamTaking = () => {
               <p className="font-semibold text-amber-400">⚠️ ระบบป้องกันการทุจริตจะทำงานเมื่อเปิดข้อสอบ:</p>
               <ul className="list-disc list-inside space-y-1">
                 <li>ต้องทำข้อสอบใน<b>โหมดเต็มหน้าจอ (Full Screen)</b> เท่านั้น</li>
-                <li>ห้ามคลิกออกนอกหน้าจอ หรือแบ่งครึ่งหน้าจอกับโปรแกรมอื่น (รวมถึง AI)</li>
+                <li>ห้ามคลิกออกนอกหน้าจอ หรือแบ่งครึ่งหน้าจอกับโปรแกรมอื่น (รวมทั้งสลับแท็บ)</li>
                 <li>ห้ามคลิกขวา, คัดลอก หรือใช้ปุ่มคีย์ลัดช่วยเหลือ</li>
               </ul>
             </div>
@@ -601,3 +678,4 @@ const ExamTaking = () => {
 };
 
 export default ExamTaking;
+
