@@ -749,7 +749,10 @@ const ExamReport = ({ teacherId }: Props) => {
         )}
         {!loadingResults && !selectedExam && <EmptyState icon={FileText} message="กรุณาเลือกชุดข้อสอบ" />}
         {!loadingResults && selectedExam && !filteredResults.length && (
-          <EmptyState icon={Users} message="ยังไม่มีผลคะแนนในข้อมูลที่เลือก" />
+          <EmptyState
+            icon={showFailingOnly ? CheckCircle2 : Users}
+            message={showFailingOnly ? 'ไม่มีนักเรียนที่สอบไม่ผ่าน ทุกคนผ่านเกณฑ์ 50% แล้ว' : 'ยังไม่มีผลคะแนนในข้อมูลที่เลือก'}
+          />
         )}
 
         {!loadingResults && sortedResults.length > 0 && (
