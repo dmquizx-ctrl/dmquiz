@@ -78,7 +78,7 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     const shouldCapAt50Percent = Boolean(retake?.cap_at_50);
-    // 50% ของคะแนนเต็ม (ไม่ปัดลง) เช่น 15 ข้อ -> 7.5
+    // 50% ของคะแนนเต็ม (ไม่ปัดลง เพื่อให้ข้อคี่ได้ไม่ต่ำกว่า 50%) เช่น 15 ข้อ -> 7.5
     const maxScoreAt50Percent = totalQuestions * 0.5;
     const finalScore = shouldCapAt50Percent ? Math.min(rawScore, maxScoreAt50Percent) : rawScore;
 
