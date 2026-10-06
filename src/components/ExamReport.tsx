@@ -21,6 +21,7 @@ import {
   Printer,
   RotateCcw,
   Trophy,
+  UserX,
   Users,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -230,12 +231,14 @@ function PrintReport({
   stats,
   preparerName,
   directorName,
+  failingOnly,
 }: {
   exam: ExamOption;
   results: ExamResult[];
   stats: ReportStats;
   preparerName: string;
   directorName: string;
+  failingOnly: boolean;
 }) {
   return (
     <div className="print-document">
