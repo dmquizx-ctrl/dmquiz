@@ -243,7 +243,11 @@ function PrintReport({
   return (
     <div className="print-document">
       <header className="print-header">
-        <p className="print-kicker">รายงานผลการประเมินผลสัมฤทธิ์ทางการเรียน</p>
+        <p className="print-kicker">
+          {failingOnly
+            ? 'รายงานรายชื่อนักเรียนที่สอบไม่ผ่าน (คะแนนต่ำกว่าร้อยละ 50)'
+            : 'รายงานผลการประเมินผลสัมฤทธิ์ทางการเรียน'}
+        </p>
         <div className="print-meta">
           <p className="print-meta-line"><strong>รายวิชา:</strong> {exam.subject_name}</p>
           <div className="print-meta-row">
