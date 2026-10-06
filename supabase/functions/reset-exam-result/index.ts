@@ -120,6 +120,7 @@ Deno.serve(async (req) => {
       result_id,
       student_id,
       exam_id,
+      cap_at_50_percent,
     } = body;
 
 
@@ -288,6 +289,34 @@ Deno.serve(async (req) => {
 
       );
 
+    }
+
+
+    // ==================================================
+    // SAVE RETAKE FLAG (server-side) - submit-exam reads this
+    // ==================================================
+
+    const retakeRows = data
+      .filter((r: any) => r.student_id && r.exam_id)
+      .map((r: any) => ({
+        student_id: r.student_id,
+        exam_id: r.exam_id,
+        cap_at_50: Boolean(cap_at_50_percent),
+      }));
+
+    const { error: retakeError } = await supabase
+      .from('exam_retakes')
+      .upsert(retakeRows, { onConflict: 'student_id,exam_id' });
+
+    if (retakeError) {
+      console.error('Save retake flag error:', retakeError);
+      return new Response(
+        JSON.stringify({
+          error: 'ไม่สามารถบันทึกเงื่อนไขการสอบใหม่ได้',
+          details: retakeError.message,
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
 
