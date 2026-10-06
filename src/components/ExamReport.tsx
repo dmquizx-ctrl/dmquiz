@@ -260,7 +260,7 @@ function PrintReport({
 
       <div className="print-summary">
         <div className="print-stat">
-          <span className="print-stat-label">นักเรียนที่มีผลคะแนน</span>
+          <span className="print-stat-label">{failingOnly ? 'นักเรียนที่สอบไม่ผ่าน' : 'นักเรียนที่มีผลคะแนน'}</span>
           <span className="print-stat-value">{results.length} คน</span>
         </div>
         <div className="print-stat">
@@ -272,8 +272,14 @@ function PrintReport({
           <span className="print-stat-value">{stats.highest}% / {stats.lowest}%</span>
         </div>
         <div className="print-stat">
-          <span className="print-stat-label">ผ่านเกณฑ์ (≥50%)</span>
-          <span className="print-stat-value">{stats.passRate}% <small>({stats.passCount}/{results.length} คน)</small></span>
+          <span className="print-stat-label">{failingOnly ? 'เกณฑ์ผ่าน' : 'ผ่านเกณฑ์ (≥50%)'}</span>
+          <span className="print-stat-value">
+            {failingOnly ? (
+              'ร้อยละ 50 ขึ้นไป'
+            ) : (
+              <>{stats.passRate}% <small>({stats.passCount}/{results.length} คน)</small></>
+            )}
+          </span>
         </div>
       </div>
 
@@ -347,6 +353,7 @@ const ExamReport = ({ teacherId }: Props) => {
   const [selectedGrade, setSelectedGrade] = useState('');
   const [selectedExam, setSelectedExam] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('name');
+  const [showFailingOnly, setShowFailingOnly] = useState(false);
   const [loadingExams, setLoadingExams] = useState(false);
   const [loadingResults, setLoadingResults] = useState(false);
   const [resettingId, setResettingId] = useState<string | null>(null);
