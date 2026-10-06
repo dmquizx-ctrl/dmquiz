@@ -7,6 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import {
   ArrowDownAZ,
   ArrowUpDown,
@@ -357,6 +359,8 @@ const ExamReport = ({ teacherId }: Props) => {
   const [loadingExams, setLoadingExams] = useState(false);
   const [loadingResults, setLoadingResults] = useState(false);
   const [resettingId, setResettingId] = useState<string | null>(null);
+  const [resetTarget, setResetTarget] = useState<ExamResult | null>(null);
+  const [capRetake, setCapRetake] = useState(false);
 
   // --- Report signatures: who prepared it, and the school director's name ---
   const [teachers, setTeachers] = useState<Teacher[]>([]);
@@ -513,16 +517,28 @@ const ExamReport = ({ teacherId }: Props) => {
     setSelectedExam(value);
   };
 
-  const handleReset = async (result: ExamResult) => {
-    const studentName = result.students ? `${result.students.first_name} ${result.students.last_name}` : 'นักเรียนคนนี้';
-    const confirmed = window.confirm(`ต้องการให้นักเรียน ${studentName} ทำข้อสอบใหม่หรือไม่?\nผลสอบเดิมจะถูกลบออกจากระบบ`);
-    if (!confirmed) return;
+  // เปิด dialog ยืนยัน (ถ้านักเรียนไม่ผ่านจะมีช่องติ๊ก "จำกัดคะแนนสอบใหม่ไม่เกิน 50%")
+  const openResetDialog = (result: ExamResult) => {
+    setCapRetake(false);
+    setResetTarget(result);
+  };
+
+  const handleReset = async () => {
+    const result = resetTarget;
+    if (!result) return;
+    const failed = toPercentage(result.score, result.total_questions) < 50;
 
     setResettingId(result.id);
     try {
-      const { data, error } = await supabase.functions.invoke('reset-exam-result', { body: { result_id: result.id } });
+      const { data, error } = await supabase.functions.invoke('reset-exam-result', {
+        body: {
+          result_id: result.id,
+          cap_at_50_percent: failed && capRetake,
+        },
+      });
       if (error || !data?.success) throw error || new Error(data?.error || 'ไม่สามารถรีเซ็ตผลสอบได้');
       toast({ title: 'รีเซ็ตผลสอบสำเร็จ' });
+      setResetTarget(null);
       await fetchResults();
     } catch (error: any) {
       toast({ title: 'รีเซ็ตไม่สำเร็จ', description: error.message, variant: 'destructive' });
@@ -786,7 +802,7 @@ const ExamReport = ({ teacherId }: Props) => {
                         <ScoreBadge percentage={percentage} />
                       </TableCell>
                       <TableCell className="text-center">
-                        <Button size="sm" variant="outline" disabled={resettingId === result.id} onClick={() => handleReset(result)}>
+                        <Button size="sm" variant="outline" disabled={resettingId === result.id} onClick={() => openResetDialog(result)}>
                           {resettingId === result.id ? (
                             <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
                           ) : (
@@ -803,6 +819,43 @@ const ExamReport = ({ teacherId }: Props) => {
           </div>
         )}
       </CardContent>
+
+      <AlertDialog open={!!resetTarget} onOpenChange={(open) => { if (!open) setResetTarget(null); }}>
+        <AlertDialogContent className="max-w-sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>ให้นักเรียนทำข้อสอบใหม่</AlertDialogTitle>
+            <AlertDialogDescription>
+              {resetTarget?.students
+                ? `${resetTarget.students.first_name} ${resetTarget.students.last_name}`
+                : 'นักเรียนคนนี้'}{' '}
+              — ผลสอบเดิมจะถูกลบออกจากระบบ
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {resetTarget && toPercentage(resetTarget.score, resetTarget.total_questions) < 50 && (
+            <label className="flex cursor-pointer items-start gap-3 rounded-lg border-2 border-amber-300 bg-amber-50 p-3">
+              <Checkbox
+                checked={capRetake}
+                onCheckedChange={(v) => setCapRetake(v === true)}
+                className="mt-0.5"
+              />
+              <span className="text-sm text-amber-900">
+                <strong>จำกัดคะแนนสอบใหม่ไม่เกิน 50%</strong>
+                <br />
+                <span className="text-xs">หากสอบใหม่ได้เกิน 50% จะถูกปรับเหลือ 50% เท่านั้น</span>
+              </span>
+            </label>
+          )}
+          <AlertDialogFooter>
+            <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); handleReset(); }}
+              disabled={!!resettingId}
+            >
+              {resettingId ? 'กำลังรีเซ็ต...' : 'ยืนยัน'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };
