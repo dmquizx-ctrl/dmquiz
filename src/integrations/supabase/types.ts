@@ -116,6 +116,42 @@ export type Database = {
           },
         ]
       }
+      exam_retakes: {
+        Row: {
+          created_at: string | null
+          exam_id: string
+          id: string
+          student_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          exam_id: string
+          id?: string
+          student_id: string
+        }
+        Update: {
+          created_at?: string | null
+          exam_id?: string
+          id?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_retakes_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_retakes_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exams: {
         Row: {
           created_at: string | null
