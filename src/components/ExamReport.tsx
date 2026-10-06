@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/integrations/supabase/client';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import {
@@ -108,7 +108,7 @@ function compareStudents(a: ExamResult, b: ExamResult): number {
 const SCORE_BANDS: ScoreBand[] = [
   { label: 'ดีเยี่ยม', min: 80, dot: 'bg-emerald-500', text: 'text-emerald-700', chip: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
   { label: 'ดี', min: 60, dot: 'bg-sky-500', text: 'text-sky-700', chip: 'bg-sky-50 text-sky-700 border-sky-200' },
-  { label: 'พอใช้', min: 50, dot: 'bg-amber-500', text: 'text-amber-700', chip: 'bg-amber-50 text-amber-700 border-amber-200' },
+  { label: '���อใช้', min: 50, dot: 'bg-amber-500', text: 'text-amber-700', chip: 'bg-amber-50 text-amber-700 border-amber-200' },
   { label: 'ควรปรับปรุง', min: 0, dot: 'bg-rose-500', text: 'text-rose-700', chip: 'bg-rose-50 text-rose-700 border-rose-200' },
 ];
 
@@ -528,14 +528,13 @@ const ExamReport = ({ teacherId }: Props) => {
   const handleReset = async () => {
     const result = resetTarget;
     if (!result) return;
-    const failed = toPercentage(result.score, result.total_questions) < 50;
 
     setResettingId(result.id);
     try {
       const { data, error } = await supabase.functions.invoke('reset-exam-result', {
         body: {
           result_id: result.id,
-          cap_at_50_percent: failed && capRetake,
+          cap_at_50_percent: capRetake,
         },
       });
       if (error || !data?.success) throw error || new Error(data?.error || 'ไม่สามารถรีเซ็ตผลสอบได้');
@@ -791,7 +790,7 @@ const ExamReport = ({ teacherId }: Props) => {
         {!loadingResults && selectedExam && !filteredResults.length && (
           <EmptyState
             icon={showFailingOnly ? CheckCircle2 : Users}
-            message={showFailingOnly ? 'ไม่มีนักเรียนที่สอบไม่ผ่าน ทุกคนผ่านเกณฑ์ 50% แล้ว' : 'ยังไม่มีผลคะแนนในข้อมูลที่เลือก'}
+            message={showFailingOnly ? 'ไม่มีนักเรียนที่สอบไม่ผ่าน ทุกคนผ่านเกณฑ์ 50% แล้ว' : 'ยังไม่มีผลคะแนนสำหรับชุดข้อสอบนี้'}
           />
         )}
 
@@ -827,28 +826,28 @@ const ExamReport = ({ teacherId }: Props) => {
                       </TableCell>
                       <TableCell className="text-center">
                         <div className="flex flex-wrap items-center justify-center gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="border-amber-300 text-amber-700 hover:bg-amber-50"
-                          disabled={adjustingId === result.id || Number(result.score) <= Number(result.total_questions) * 0.5}
-                          onClick={() => handleAdjustTo50(result)}
-                        >
-                          {adjustingId === result.id ? (
-                            <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
-                          ) : (
-                            <Scale className="mr-1 h-3.5 w-3.5" />
-                          )}
-                          ปรับเป็น 50%
-                        </Button>
-                        <Button size="sm" variant="outline" disabled={resettingId === result.id} onClick={() => openResetDialog(result)}>
-                          {resettingId === result.id ? (
-                            <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
-                          ) : (
-                            <RotateCcw className="mr-1 h-3.5 w-3.5" />
-                          )}
-                          ให้ทำใหม่
-                        </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="border-amber-300 text-amber-700 hover:bg-amber-50"
+                            disabled={adjustingId === result.id || Number(result.score) <= Number(result.total_questions) * 0.5}
+                            onClick={() => handleAdjustTo50(result)}
+                          >
+                            {adjustingId === result.id ? (
+                              <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <Scale className="mr-1 h-3.5 w-3.5" />
+                            )}
+                            ปรับเป็น 50%
+                          </Button>
+                          <Button size="sm" variant="outline" disabled={resettingId === result.id} onClick={() => openResetDialog(result)}>
+                            {resettingId === result.id ? (
+                              <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <RotateCcw className="mr-1 h-3.5 w-3.5" />
+                            )}
+                            ให้ทำใหม่
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
