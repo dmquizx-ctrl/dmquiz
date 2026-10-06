@@ -481,8 +481,10 @@ const ExamReport = ({ teacherId }: Props) => {
   const printResults = useMemo(() => [...filteredResults].sort(compareStudents), [filteredResults]);
 
   const currentExam = exams.find((e) => e.id === selectedExam);
-  const totalQuestions = filteredResults[0]?.total_questions ?? 0;
-  const stats = useMemo(() => computeStats(filteredResults), [filteredResults]);
+  const totalQuestions = results[0]?.total_questions ?? 0;
+  // Stats always describe the whole class; the failing-only toggle only
+  // narrows the table rows and the printed name list.
+  const stats = useMemo(() => computeStats(results), [results]);
 
   const usingCustomPreparer = selectedTeacherId === CUSTOM_TEACHER || !teachers.length;
   const preparerName = useMemo(() => {
@@ -694,6 +696,16 @@ const ExamReport = ({ teacherId }: Props) => {
             </div>
             <div className="flex w-full flex-wrap gap-2 sm:w-auto">
               <Button
+                variant={showFailingOnly ? 'default' : 'outline'}
+                className={showFailingOnly ? 'bg-rose-600 hover:bg-rose-700' : 'border-rose-300 text-rose-700 hover:bg-rose-50'}
+                onClick={() => setShowFailingOnly((v) => !v)}
+                title="แสดงเฉพาะนักเรียนที่ได้คะแนนต่ำกว่า 50%"
+              >
+                <UserX className="mr-2 h-4 w-4" />
+                คนสอบไม่ผ่าน ({failingResults.length})
+              </Button>
+
+              <Button
                 variant="outline"
                 onClick={() => setSortKey((key) => (key === 'name' ? 'score' : 'name'))}
                 title={sortKey === 'name' ? 'เรียงตามชื่อ - กดเพื่อเรียงตามคะแนน' : 'เรียงตามคะแนน - กดเพื่อเรียงตามชื่อ'}
@@ -704,7 +716,7 @@ const ExamReport = ({ teacherId }: Props) => {
 
               <Button disabled={!filteredResults.length} onClick={() => window.print()}>
                 <Printer className="mr-2 h-4 w-4" />
-                พิมพ์รายงานคะแนน (A4)
+                {showFailingOnly ? 'พิมพ์รายงานคนสอบไม่ผ่าน (A4)' : 'พิมพ์รายงานคะแนน (A4)'}
               </Button>
             </div>
           </div>
@@ -723,6 +735,7 @@ const ExamReport = ({ teacherId }: Props) => {
                 stats={stats}
                 preparerName={preparerName}
                 directorName={directorName}
+                failingOnly={showFailingOnly}
               />
             </div>,
             document.body,
