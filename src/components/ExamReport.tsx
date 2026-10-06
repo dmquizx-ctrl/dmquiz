@@ -461,7 +461,14 @@ const ExamReport = ({ teacherId }: Props) => {
     [exams, selectedSubject, selectedGrade],
   );
 
-  const filteredResults = results;
+  // Failing = score below 50%. Kept as a memo so the table, stats, chart and
+  // print sheet all agree on the same row set.
+  const failingResults = useMemo(
+    () => results.filter((r) => toPercentage(r.score, r.total_questions) < 50),
+    [results],
+  );
+
+  const filteredResults = showFailingOnly ? failingResults : results;
 
   const sortedResults = useMemo(() => {
     const rows = [...filteredResults];
