@@ -82,8 +82,6 @@ const ExamTaking = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<{ score: number; total_questions: number } | null>(null);
-  const [retakeDialogOpen, setRetakeDialogOpen] = useState(false);
-  const [retakeMode, setRetakeMode] = useState<'cap' | 'normal'>('cap');
 
   // โหมดบังคับเต็มหน้าจอ (Anti-Cheating State)
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -114,11 +112,6 @@ const ExamTaking = () => {
       // localStorage may be unavailable
     }
   }, [answers]);
-
-  const getRetakeCapStorageKey = useCallback(() => {
-    if (!user?.id || !examId) return null;
-    return `examRetakeCap:${user.id}:${examId}`;
-  }, [user?.id, examId]);
 
   useEffect(() => {
     let isMounted = true;
@@ -243,38 +236,6 @@ const ExamTaking = () => {
     }
   };
 
-  const handleRetakeExam = useCallback(async () => {
-    if (!user || !examId) return;
-
-    try {
-      setSubmitting(true);
-
-      const retakeCapKey = getRetakeCapStorageKey();
-      if (retakeMode === 'cap' && retakeCapKey) {
-        localStorage.setItem(retakeCapKey, 'true');
-      } else if (retakeCapKey) {
-        localStorage.removeItem(retakeCapKey);
-      }
-
-      const { data, error } = await supabase.functions.invoke('reset-exam-result', {
-        body: { student_id: user.id, exam_id: examId },
-      });
-
-      if (error || !data?.success) {
-        throw new Error(data?.error || 'ไม่สามารถรีเซ็ตผลสอบได้');
-      }
-
-      window.location.href = `/exam/${examId}`;
-    } catch (error: any) {
-      console.error('Retake exam error:', error);
-      toast({
-        title: error.message || 'ไม่สามารถให้สอบใหม่ได้',
-        variant: 'destructive',
-      });
-      setSubmitting(false);
-    }
-  }, [examId, getRetakeCapStorageKey, retakeMode, toast, user]);
-
   const handleSubmit = useCallback(async () => {
     if (submittingRef.current || resultRef.current) return;
     submittingRef.current = true;
@@ -282,8 +243,6 @@ const ExamTaking = () => {
 
     const maxAttempts = 3;
     let lastError: any = null;
-    const retakeCapKey = getRetakeCapStorageKey();
-    const capAt50Percent = retakeCapKey ? localStorage.getItem(retakeCapKey) === 'true' : false;
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
@@ -292,7 +251,6 @@ const ExamTaking = () => {
             student_id: user!.id,
             exam_id: examId,
             answers: answersRef.current,
-            cap_at_50_percent: capAt50Percent,
           }
         });
 
@@ -302,10 +260,6 @@ const ExamTaking = () => {
 
         setResult({ score: data.score, total_questions: data.total_questions });
         toast({ title: `ส่งข้อสอบสำเร็จ! ได้ ${data.score}/${data.total_questions} คะแนน` });
-
-        if (retakeCapKey) {
-          try { localStorage.removeItem(retakeCapKey); } catch {}
-        }
 
         if (storageKeyRef.current) {
           try { localStorage.removeItem(storageKeyRef.current); } catch {}
@@ -335,7 +289,7 @@ const ExamTaking = () => {
 
     submittingRef.current = false;
     setSubmitting(false);
-  }, [examId, getRetakeCapStorageKey, toast, user]);
+  }, [examId, toast, user]);
 
   // ฟังก์ชันสลับเข้าสู่โหมดเต็มหน้าจอ (Full Screen Request)
   const handleStartExamFullScreen = () => {
@@ -485,7 +439,6 @@ const ExamTaking = () => {
 
   if (result) {
     const percentage = Math.round((result.score / result.total_questions) * 100);
-    const didNotPass = percentage < 50;
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-secondary/10 to-background flex items-center justify-center p-4">
@@ -499,71 +452,11 @@ const ExamTaking = () => {
             <div className="text-5xl font-bold text-primary">{result.score}/{result.total_questions}</div>
             <p className="text-muted-foreground">คิดเป็น {percentage}%</p>
 
-            <div className="grid grid-cols-1 gap-3 pt-2 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 pt-2">
               <Button onClick={() => navigate('/student')} className="w-full">
                 กลับหน้าหลัก
               </Button>
 
-              {didNotPass && (
-                <AlertDialog open={retakeDialogOpen} onOpenChange={setRetakeDialogOpen}>
-                  <AlertDialogTrigger asChild>
-                    <Button className="w-full bg-amber-600 hover:bg-amber-500" disabled={submitting}>
-                      ให้สอบใหม่
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent className="max-w-sm">
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>เลือกวิธีการสอบใหม่</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        เลือกตัวเลือกข้อใดข้อหนึ่ง:
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <div className="space-y-3 py-4">
-                      <label className="flex items-center gap-3 rounded-lg border-2 border-amber-300 bg-amber-50 p-3 cursor-pointer hover:bg-amber-100 transition-colors">
-                        <input
-                          type="radio"
-                          name="retakeOption"
-                          value="cap"
-                          checked={retakeMode === 'cap'}
-                          onChange={() => setRetakeMode('cap')}
-                          className="h-4 w-4 accent-amber-600"
-                        />
-                        <span className="text-sm text-amber-900">
-                          <strong>ใช้ค่าสูงสุด 50%</strong>
-                          <br />
-                          <span className="text-xs">หากคะแนนสอบใหม่เกิน 50% จะถูกปรับเป็น 50% เท่านั้น</span>
-                        </span>
-                      </label>
-
-                      <label className="flex items-center gap-3 rounded-lg border-2 border-slate-300 bg-slate-50 p-3 cursor-pointer hover:bg-slate-100 transition-colors">
-                        <input
-                          type="radio"
-                          name="retakeOption"
-                          value="normal"
-                          checked={retakeMode === 'normal'}
-                          onChange={() => setRetakeMode('normal')}
-                          className="h-4 w-4 accent-slate-600"
-                        />
-                        <span className="text-sm text-slate-900">
-                          <strong>สอบใหม่แบบปกติ</strong>
-                          <br />
-                          <span className="text-xs">ไม่มีการคุมคะแนน ได้คะแนนจริงเท่าไหร่ก็เก็บเท่านั้น</span>
-                        </span>
-                      </label>
-                    </div>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={handleRetakeExam}
-                        disabled={submitting}
-                        className="bg-amber-600 hover:bg-amber-700"
-                      >
-                        {submitting ? 'กำลังเตรียม...' : 'ยืนยันสอบใหม่'}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              )}
             </div>
           </CardContent>
         </Card>
