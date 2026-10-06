@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { student_id, exam_id, answers, cap_at_50_percent } = await req.json();
+    const { student_id, exam_id, answers } = await req.json();
 
     if (!student_id || !exam_id || !answers) {
       return new Response(
@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
       .select('id')
       .eq('student_id', student_id)
       .eq('exam_id', exam_id)
-      .single();
+      .maybeSingle();
 
     if (existing) {
       return new Response(
@@ -69,8 +69,17 @@ Deno.serve(async (req) => {
       }
     }
 
-    const shouldCapAt50Percent = Boolean(cap_at_50_percent);
-    const maxScoreAt50Percent = shouldCapAt50Percent ? Math.max(0, Math.floor(totalQuestions * 0.5)) : totalQuestions;
+    // เงื่อนไข cap 50% อ่านจากฐานข้อมูล (ครูเป็นคนตั้งตอนกด "ให้ทำใหม่") ไม่เชื่อค่าจาก client
+    const { data: retake } = await supabase
+      .from('exam_retakes')
+      .select('id, cap_at_50')
+      .eq('student_id', student_id)
+      .eq('exam_id', exam_id)
+      .maybeSingle();
+
+    const shouldCapAt50Percent = Boolean(retake?.cap_at_50);
+    // 50% ของคะแนนเต็ม (ไม่ปัดลง) เช่น 15 ข้อ -> 7.5
+    const maxScoreAt50Percent = totalQuestions * 0.5;
     const finalScore = shouldCapAt50Percent ? Math.min(rawScore, maxScoreAt50Percent) : rawScore;
 
     const { data: result, error: insertError } = await supabase
@@ -91,6 +100,10 @@ Deno.serve(async (req) => {
         JSON.stringify({ error: 'ไม่สามารถบันทึกผลสอบได้' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    }
+
+    if (retake) {
+      await supabase.from('exam_retakes').delete().eq('id', retake.id);
     }
 
     return new Response(
