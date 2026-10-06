@@ -82,7 +82,6 @@ const ExamTaking = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<{ score: number; total_questions: number } | null>(null);
-  const [retakeCapAt50, setRetakeCapAt50] = useState(false);
 
   // โหมดบังคับเต็มหน้าจอ (Anti-Cheating State)
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -242,14 +241,14 @@ const ExamTaking = () => {
     }
   };
 
-  const handleRetakeExam = useCallback(async () => {
+  const handleRetakeExam = useCallback(async (capAt50: boolean) => {
     if (!user || !examId) return;
 
     try {
       setSubmitting(true);
 
       const retakeCapKey = getRetakeCapStorageKey();
-      if (retakeCapAt50 && retakeCapKey) {
+      if (capAt50 && retakeCapKey) {
         localStorage.setItem(retakeCapKey, 'true');
       } else if (retakeCapKey) {
         localStorage.removeItem(retakeCapKey);
@@ -270,10 +269,9 @@ const ExamTaking = () => {
         title: error.message || 'ไม่สามารถให้สอบใหม่ได้',
         variant: 'destructive',
       });
-    } finally {
       setSubmitting(false);
     }
-  }, [examId, getRetakeCapStorageKey, retakeCapAt50, toast, user]);
+  }, [examId, getRetakeCapStorageKey, toast, user]);
 
   const handleSubmit = useCallback(async () => {
     if (submittingRef.current || resultRef.current) return;
@@ -499,31 +497,71 @@ const ExamTaking = () => {
             <div className="text-5xl font-bold text-primary">{result.score}/{result.total_questions}</div>
             <p className="text-muted-foreground">คิดเป็น {percentage}%</p>
 
-            {didNotPass && (
-              <label className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-left text-sm text-amber-900">
-                <input
-                  type="checkbox"
-                  checked={retakeCapAt50}
-                  onChange={(event) => setRetakeCapAt50(event.target.checked)}
-                  className="mt-1 h-4 w-4 accent-amber-600"
-                />
-                <span>กรณีสอบใหม่ ให้คะแนนไม่เกิน 50% หากทำคะแนนเกิน 50%</span>
-              </label>
-            )}
-
             <div className="grid grid-cols-1 gap-3 pt-2 sm:grid-cols-2">
               <Button onClick={() => navigate('/student')} className="w-full">
                 กลับหน้าหลัก
               </Button>
 
               {didNotPass && (
-                <Button
-                  onClick={handleRetakeExam}
-                  className="w-full bg-amber-600 hover:bg-amber-500"
-                  disabled={submitting}
-                >
-                  {submitting ? 'กำลังให้สอบใหม่...' : 'ให้สอบใหม่'}
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button className="w-full bg-amber-600 hover:bg-amber-500" disabled={submitting}>
+                      ให้สอบใหม่
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>ให้สอบใหม่</AlertDialogTitle>
+                      <AlertDialogDescription className="space-y-3">
+                        <p>เลือกวิธีการสอบใหม่ของคุณ:</p>
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <div className="space-y-3">
+                      <label className="flex items-start gap-3 rounded-lg border-2 border-amber-300 bg-amber-50 p-3 cursor-pointer hover:bg-amber-100 transition-colors">
+                        <input
+                          type="radio"
+                          name="retakeOption"
+                          value="with-cap"
+                          defaultChecked
+                          className="mt-1 h-4 w-4 accent-amber-600"
+                        />
+                        <span className="text-sm text-amber-900">
+                          <strong>ใช้ค่าสูงสุด 50%</strong>
+                          <br />
+                          <span className="text-xs">หากคะแนนสอบใหม่เกิน 50% จะถูกปรับให้เป็น 50% เท่านั้น</span>
+                        </span>
+                      </label>
+
+                      <label className="flex items-start gap-3 rounded-lg border-2 border-slate-300 bg-slate-50 p-3 cursor-pointer hover:bg-slate-100 transition-colors">
+                        <input
+                          type="radio"
+                          name="retakeOption"
+                          value="no-cap"
+                          className="mt-1 h-4 w-4 accent-slate-600"
+                        />
+                        <span className="text-sm text-slate-900">
+                          <strong>สอบใหม่แบบปกติ</strong>
+                          <br />
+                          <span className="text-xs">ได้คะแนนเท่าไหร่ก็เก็บไว้</span>
+                        </span>
+                      </label>
+                    </div>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => {
+                          const selected = document.querySelector('input[name="retakeOption"]:checked') as HTMLInputElement;
+                          const capAt50 = selected?.value === 'with-cap';
+                          handleRetakeExam(capAt50);
+                        }}
+                        disabled={submitting}
+                        className="bg-amber-600 hover:bg-amber-700"
+                      >
+                        {submitting ? 'กำลังเตรียม...' : 'ยืนยันสอบใหม่'}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               )}
             </div>
           </CardContent>
@@ -546,7 +584,7 @@ const ExamTaking = () => {
               <p className="font-semibold text-amber-400">⚠️ ระบบป้องกันการทุจริตจะทำงานเมื่อเปิดข้อสอบ:</p>
               <ul className="list-disc list-inside space-y-1">
                 <li>ต้องทำข้อสอบใน<b>โหมดเต็มหน้าจอ (Full Screen)</b> เท่านั้น</li>
-                <li>ห้ามคลิกออกนอกหน้าจอ หรือแบ่งครึ่งหน้าจอกับโปรแกรมอื่น (รวมทั้งสลับแท็บ)</li>
+                <li>ห้ามคลิกออกนอกหน้าจอ หรือแบ่งครึ่งหน้าจอกับโปรแกรมอื่น (รวมสลับแท็บ)</li>
                 <li>ห้ามคลิกขวา, คัดลอก หรือใช้ปุ่มคีย์ลัดช่วยเหลือ</li>
               </ul>
             </div>
