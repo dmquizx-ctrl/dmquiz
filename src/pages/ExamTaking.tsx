@@ -82,6 +82,8 @@ const ExamTaking = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<{ score: number; total_questions: number } | null>(null);
+  const [retakeDialogOpen, setRetakeDialogOpen] = useState(false);
+  const [retakeMode, setRetakeMode] = useState<'cap' | 'normal'>('cap');
 
   // โหมดบังคับเต็มหน้าจอ (Anti-Cheating State)
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -241,14 +243,14 @@ const ExamTaking = () => {
     }
   };
 
-  const handleRetakeExam = useCallback(async (capAt50: boolean) => {
+  const handleRetakeExam = useCallback(async () => {
     if (!user || !examId) return;
 
     try {
       setSubmitting(true);
 
       const retakeCapKey = getRetakeCapStorageKey();
-      if (capAt50 && retakeCapKey) {
+      if (retakeMode === 'cap' && retakeCapKey) {
         localStorage.setItem(retakeCapKey, 'true');
       } else if (retakeCapKey) {
         localStorage.removeItem(retakeCapKey);
@@ -271,7 +273,7 @@ const ExamTaking = () => {
       });
       setSubmitting(false);
     }
-  }, [examId, getRetakeCapStorageKey, toast, user]);
+  }, [examId, getRetakeCapStorageKey, retakeMode, toast, user]);
 
   const handleSubmit = useCallback(async () => {
     if (submittingRef.current || resultRef.current) return;
@@ -503,57 +505,56 @@ const ExamTaking = () => {
               </Button>
 
               {didNotPass && (
-                <AlertDialog>
+                <AlertDialog open={retakeDialogOpen} onOpenChange={setRetakeDialogOpen}>
                   <AlertDialogTrigger asChild>
                     <Button className="w-full bg-amber-600 hover:bg-amber-500" disabled={submitting}>
                       ให้สอบใหม่
                     </Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent>
+                  <AlertDialogContent className="max-w-sm">
                     <AlertDialogHeader>
-                      <AlertDialogTitle>ให้สอบใหม่</AlertDialogTitle>
-                      <AlertDialogDescription className="space-y-3">
-                        <p>เลือกวิธีการสอบใหม่ของคุณ:</p>
+                      <AlertDialogTitle>เลือกวิธีการสอบใหม่</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        เลือกตัวเลือกข้อใดข้อหนึ่ง:
                       </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <div className="space-y-3">
-                      <label className="flex items-start gap-3 rounded-lg border-2 border-amber-300 bg-amber-50 p-3 cursor-pointer hover:bg-amber-100 transition-colors">
+                    <div className="space-y-3 py-4">
+                      <label className="flex items-center gap-3 rounded-lg border-2 border-amber-300 bg-amber-50 p-3 cursor-pointer hover:bg-amber-100 transition-colors">
                         <input
                           type="radio"
                           name="retakeOption"
-                          value="with-cap"
-                          defaultChecked
-                          className="mt-1 h-4 w-4 accent-amber-600"
+                          value="cap"
+                          checked={retakeMode === 'cap'}
+                          onChange={() => setRetakeMode('cap')}
+                          className="h-4 w-4 accent-amber-600"
                         />
                         <span className="text-sm text-amber-900">
                           <strong>ใช้ค่าสูงสุด 50%</strong>
                           <br />
-                          <span className="text-xs">หากคะแนนสอบใหม่เกิน 50% จะถูกปรับให้เป็น 50% เท่านั้น</span>
+                          <span className="text-xs">หากคะแนนสอบใหม่เกิน 50% จะถูกปรับเป็น 50% เท่านั้น</span>
                         </span>
                       </label>
 
-                      <label className="flex items-start gap-3 rounded-lg border-2 border-slate-300 bg-slate-50 p-3 cursor-pointer hover:bg-slate-100 transition-colors">
+                      <label className="flex items-center gap-3 rounded-lg border-2 border-slate-300 bg-slate-50 p-3 cursor-pointer hover:bg-slate-100 transition-colors">
                         <input
                           type="radio"
                           name="retakeOption"
-                          value="no-cap"
-                          className="mt-1 h-4 w-4 accent-slate-600"
+                          value="normal"
+                          checked={retakeMode === 'normal'}
+                          onChange={() => setRetakeMode('normal')}
+                          className="h-4 w-4 accent-slate-600"
                         />
                         <span className="text-sm text-slate-900">
                           <strong>สอบใหม่แบบปกติ</strong>
                           <br />
-                          <span className="text-xs">ได้คะแนนเท่าไหร่ก็เก็บไว้</span>
+                          <span className="text-xs">ไม่มีการคุมคะแนน ได้คะแนนจริงเท่าไหร่ก็เก็บเท่านั้น</span>
                         </span>
                       </label>
                     </div>
                     <AlertDialogFooter>
                       <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
                       <AlertDialogAction
-                        onClick={() => {
-                          const selected = document.querySelector('input[name="retakeOption"]:checked') as HTMLInputElement;
-                          const capAt50 = selected?.value === 'with-cap';
-                          handleRetakeExam(capAt50);
-                        }}
+                        onClick={handleRetakeExam}
                         disabled={submitting}
                         className="bg-amber-600 hover:bg-amber-700"
                       >
@@ -716,4 +717,3 @@ const ExamTaking = () => {
 };
 
 export default ExamTaking;
-
