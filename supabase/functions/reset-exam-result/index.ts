@@ -302,7 +302,10 @@ Deno.serve(async (req) => {
       .map((r: any) => ({
         student_id: r.student_id,
         exam_id: r.exam_id,
-        cap_at_50: Boolean(cap_at_50_percent),
+        // สอบตก (<50%) แล้วให้สอบใหม่ = จำกัดคะแนนไว้ที่ 50% เสมอ
+        cap_at_50:
+          Boolean(cap_at_50_percent) ||
+          (Number(r.total_questions) > 0 && Number(r.score) / Number(r.total_questions) < 0.5),
       }));
 
     const { error: retakeError } = await supabase
