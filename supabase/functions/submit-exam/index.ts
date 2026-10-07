@@ -1,13 +1,21 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { status: 204, headers: corsHeaders });
+  }
+
+  if (req.method !== 'POST') {
+    return new Response(
+      JSON.stringify({ error: 'Method not allowed' }),
+      { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   }
 
   try {
@@ -24,13 +32,12 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Check if student already submitted this exam
     const { data: existing } = await supabase
       .from('exam_results')
       .select('id')
       .eq('student_id', student_id)
       .eq('exam_id', exam_id)
-      .single();
+      .maybeSingle();
 
     if (existing) {
       return new Response(
@@ -39,7 +46,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Get exam questions with correct answers
     const { data: examQuestions, error: eqError } = await supabase
       .from('exam_questions')
       .select('question_id, question_order, questions(id, correct_answer)')
@@ -53,24 +59,45 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Calculate score
-    let score = 0;
+    let rawScore = 0;
     const totalQuestions = examQuestions.length;
 
     for (const eq of examQuestions) {
       const q = eq.questions as any;
       if (q && answers[eq.question_id] === q.correct_answer) {
-        score++;
-      }
+        rawScore++;
     }
 
-    // Save result
+    // Capped retake: score cannot exceed 50%
+    const { data: retake } = await supabase
+      .from('exam_retakes')
+      .select('id')
+      .eq('student_id', student_id)
+      .eq('exam_id', exam_id)
+      .maybeSingle();
+    const cap = totalQuestions / 2;
+    if (retake && score > cap) score = cap;
+    }
+
+    // เงื่อนไข cap 50% อ่านจากฐานข้อมูล (ครูเป็นคนตั้งตอนกด "ให้ทำใหม่") ไม่เชื่อค่าจาก client
+    const { data: retake } = await supabase
+      .from('exam_retakes')
+      .select('id, cap_at_50')
+      .eq('student_id', student_id)
+      .eq('exam_id', exam_id)
+      .maybeSingle();
+
+    const shouldCapAt50Percent = Boolean(retake?.cap_at_50);
+    // 50% ของคะแนนเต็ม (ไม่ปัดลง เพื่อให้ข้อคี่ได้ไม่ต่ำกว่า 50%) เช่น 15 ข้อ -> 7.5
+    const maxScoreAt50Percent = totalQuestions * 0.5;
+    const finalScore = shouldCapAt50Percent ? Math.min(rawScore, maxScoreAt50Percent) : rawScore;
+
     const { data: result, error: insertError } = await supabase
       .from('exam_results')
       .insert({
         student_id,
         exam_id,
-        score,
+        score: finalScore,
         total_questions: totalQuestions,
         answers,
       })
@@ -85,11 +112,21 @@ Deno.serve(async (req) => {
       );
     }
 
+    if (retake) {
+      await supabase.from('exam_retakes').delete().eq('id', retake.id);
+    }
+
     return new Response(
-      JSON.stringify({ success: true, score, total_questions: totalQuestions, result }),
+      JSON.stringify({
+        success: true,
+        score: finalScore,
+        total_questions: totalQuestions,
+        raw_score: rawScore,
+        capped_at_50: shouldCapAt50Percent && rawScore > maxScoreAt50Percent,
+        result,
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
-
   } catch (error) {
     console.error('Submit exam error:', error);
     return new Response(
