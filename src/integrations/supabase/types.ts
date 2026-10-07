@@ -118,18 +118,21 @@ export type Database = {
       }
       exam_retakes: {
         Row: {
+          cap_at_50: boolean
           created_at: string | null
           exam_id: string
           id: string
           student_id: string
         }
         Insert: {
+          cap_at_50?: boolean
           created_at?: string | null
           exam_id: string
           id?: string
           student_id: string
         }
         Update: {
+          cap_at_50?: boolean
           created_at?: string | null
           exam_id?: string
           id?: string
