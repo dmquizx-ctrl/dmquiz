@@ -357,6 +357,8 @@ const ExamReport = ({ teacherId }: Props) => {
   const [loadingExams, setLoadingExams] = useState(false);
   const [loadingResults, setLoadingResults] = useState(false);
   const [resettingId, setResettingId] = useState<string | null>(null);
+  const [retakeIds, setRetakeIds] = useState<Set<string>>(new Set());
+  const [bulkRetaking, setBulkRetaking] = useState(false);
 
   // --- Report signatures: who prepared it, and the school director's name ---
   const [teachers, setTeachers] = useState<Teacher[]>([]);
@@ -511,6 +513,26 @@ const ExamReport = ({ teacherId }: Props) => {
 
   const handleExamChange = (value: string) => {
     setSelectedExam(value);
+  };
+
+  const handleCappedRetake = async () => {
+    if (!window.confirm(`ให้นักเรียน ${retakeIds.size} คนสอบใหม่?\nผลเดิมจะถูกลบ และคะแนนสอบใหม่จะได้สูงสุดไม่เกิน 50%`)) return;
+    setBulkRetaking(true);
+    try {
+      for (const id of retakeIds) {
+        const { data, error } = await supabase.functions.invoke('reset-exam-result', {
+          body: { result_id: id, capped_retake: true },
+        });
+        if (error || !data?.success) throw error || new Error(data?.error || 'ไม่สามารถรีเซ็ตผลสอบได้');
+      }
+      toast({ title: 'ให้สอบใหม่เรียบร้อย', description: 'คะแนนสอบใหม่จะถูกจำกัดไว้ที่ 50%' });
+      setRetakeIds(new Set());
+      await fetchResults();
+    } catch (error: any) {
+      toast({ title: 'ไม่สำเร็จ', description: error.message, variant: 'destructive' });
+    } finally {
+      setBulkRetaking(false);
+    }
   };
 
   const handleReset = async (result: ExamResult) => {
@@ -755,6 +777,18 @@ const ExamReport = ({ teacherId }: Props) => {
           />
         )}
 
+        {!loadingResults && retakeIds.size > 0 && (
+          <div className="flex flex-col gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 sm:flex-row sm:items-center sm:justify-between print-controls">
+            <p className="text-sm text-rose-800">
+              เลือก {retakeIds.size} คน — สอบใหม่ได้คะแนนสูงสุดไม่เกิน 50%
+            </p>
+            <Button className="bg-rose-600 hover:bg-rose-700" disabled={bulkRetaking} onClick={handleCappedRetake}>
+              {bulkRetaking ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RotateCcw className="mr-2 h-4 w-4" />}
+              ให้สอบใหม่ (คะแนนสูงสุด 50%)
+            </Button>
+          </div>
+        )}
+
         {!loadingResults && sortedResults.length > 0 && (
           <div className="overflow-hidden rounded-xl border border-slate-200 print-controls">
             <Table>
@@ -786,6 +820,24 @@ const ExamReport = ({ teacherId }: Props) => {
                         <ScoreBadge percentage={percentage} />
                       </TableCell>
                       <TableCell className="text-center">
+                        {percentage < 50 && (
+                          <label className="mb-1 flex items-center justify-center gap-1 text-xs text-rose-700">
+                            <input
+                              type="checkbox"
+                              className="h-4 w-4 accent-rose-600"
+                              checked={retakeIds.has(result.id)}
+                              onChange={(e) =>
+                                setRetakeIds((prev) => {
+                                  const next = new Set(prev);
+                                  if (e.target.checked) next.add(result.id);
+                                  else next.delete(result.id);
+                                  return next;
+                                })
+                              }
+                            />
+                            สอบซ่อม
+                          </label>
+                        )}
                         <Button size="sm" variant="outline" disabled={resettingId === result.id} onClick={() => handleReset(result)}>
                           {resettingId === result.id ? (
                             <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
