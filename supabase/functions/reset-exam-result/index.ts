@@ -115,18 +115,6 @@ Deno.serve(async (req) => {
     const body =
       await req.json();
 
-    if (body.capped_retake && body.result_id) {
-      const { data: old } = await supabase
-        .from('exam_results')
-        .select('student_id, exam_id')
-        .eq('id', body.result_id)
-        .maybeSingle();
-      if (old?.student_id && old?.exam_id) {
-        await supabase
-          .from('exam_retakes')
-          .upsert({ student_id: old.student_id, exam_id: old.exam_id, cap_at_50: true }, { onConflict: 'student_id,exam_id' });
-      }
-    }
 
 
     const {

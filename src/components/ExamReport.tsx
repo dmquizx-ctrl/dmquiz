@@ -521,7 +521,7 @@ const ExamReport = ({ teacherId }: Props) => {
     try {
       for (const id of retakeIds) {
         const { data, error } = await supabase.functions.invoke('reset-exam-result', {
-          body: { result_id: id, capped_retake: true },
+          body: { result_id: id, cap_at_50_percent: true },
         });
         if (error || !data?.success) throw error || new Error(data?.error || 'ไม่สามารถรีเซ็ตผลสอบได้');
       }
