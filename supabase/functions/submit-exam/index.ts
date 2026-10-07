@@ -66,17 +66,7 @@ Deno.serve(async (req) => {
       const q = eq.questions as any;
       if (q && answers[eq.question_id] === q.correct_answer) {
         rawScore++;
-    }
-
-    // Capped retake: score cannot exceed 50%
-    const { data: retake } = await supabase
-      .from('exam_retakes')
-      .select('id')
-      .eq('student_id', student_id)
-      .eq('exam_id', exam_id)
-      .maybeSingle();
-    const cap = totalQuestions / 2;
-    if (retake && score > cap) score = cap;
+      }
     }
 
     // เงื่อนไข cap 50% อ่านจากฐานข้อมูล (ครูเป็นคนตั้งตอนกด "ให้ทำใหม่") ไม่เชื่อค่าจาก client
