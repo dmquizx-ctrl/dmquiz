@@ -247,11 +247,7 @@ const ExamTaking = () => {
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
         const response = await supabase.functions.invoke('submit-exam', {
-          body: {
-            student_id: user!.id,
-            exam_id: examId,
-            answers: answersRef.current,
-          }
+          body: { student_id: user!.id, exam_id: examId, answers: answersRef.current }
         });
 
         if (response.error) throw response.error;
@@ -289,7 +285,7 @@ const ExamTaking = () => {
 
     submittingRef.current = false;
     setSubmitting(false);
-  }, [examId, toast, user]);
+  }, [examId, user, toast]);
 
   // ฟังก์ชันสลับเข้าสู่โหมดเต็มหน้าจอ (Full Screen Request)
   const handleStartExamFullScreen = () => {
@@ -439,7 +435,6 @@ const ExamTaking = () => {
 
   if (result) {
     const percentage = Math.round((result.score / result.total_questions) * 100);
-
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-secondary/10 to-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md shadow-lg">
@@ -451,13 +446,9 @@ const ExamTaking = () => {
             <p className="text-lg font-medium">{exam?.exam_name}</p>
             <div className="text-5xl font-bold text-primary">{result.score}/{result.total_questions}</div>
             <p className="text-muted-foreground">คิดเป็น {percentage}%</p>
-
-            <div className="grid grid-cols-1 gap-3 pt-2">
-              <Button onClick={() => navigate('/student')} className="w-full">
-                กลับหน้าหลัก
-              </Button>
-
-            </div>
+            <Button onClick={() => navigate('/student')} className="w-full mt-4">
+              กลับหน้าหลัก
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -478,7 +469,7 @@ const ExamTaking = () => {
               <p className="font-semibold text-amber-400">⚠️ ระบบป้องกันการทุจริตจะทำงานเมื่อเปิดข้อสอบ:</p>
               <ul className="list-disc list-inside space-y-1">
                 <li>ต้องทำข้อสอบใน<b>โหมดเต็มหน้าจอ (Full Screen)</b> เท่านั้น</li>
-                <li>ห้ามคลิกออกนอกหน้าจอ หรือแบ่งครึ่งหน้าจอกับโปรแกรมอื่น (รวมสลับแท็บ)</li>
+                <li>ห้ามคลิกออกนอกหน้าจอ หรือแบ่งครึ่งหน้าจอกับโปรแกรมอื่น (รวมถึง AI)</li>
                 <li>ห้ามคลิกขวา, คัดลอก หรือใช้ปุ่มคีย์ลัดช่วยเหลือ</li>
               </ul>
             </div>
