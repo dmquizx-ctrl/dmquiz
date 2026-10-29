@@ -779,6 +779,17 @@ const ExamReport = ({ teacherId }: Props) => {
                 {sortKey === 'name' ? 'เรียงตามชื่อ' : 'เรียงตามคะแนน'}
               </Button>
 
+              <Button
+                variant="outline"
+                className="border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+                disabled={!sortedResults.length}
+                onClick={handleExportXlsx}
+                title="ส่งออกตารางคะแนนที่แสดงอยู่เป็นไฟล์ Excel"
+              >
+                <FileSpreadsheet className="mr-2 h-4 w-4" />
+                ส่งออก Excel (.xlsx)
+              </Button>
+
               <Button disabled={!filteredResults.length} onClick={() => window.print()}>
                 <Printer className="mr-2 h-4 w-4" />
                 {showFailingOnly ? 'พิมพ์รายงานคนสอบไม่ผ่าน (A4)' : 'พิมพ์รายงานคะแนน (A4)'}
