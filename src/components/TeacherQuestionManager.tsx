@@ -421,6 +421,18 @@ const TeacherQuestionManager = ({ teacherId, subjects }: TeacherQuestionManagerP
 
         {/* แถบปุ่มจัดการด้านบน */}
         <div className="flex flex-wrap items-center gap-2">
+          {/* ปุ่มส่งออกคลังข้อสอบเป็นไฟล์ Excel (.xlsx) */}
+          {filteredQuestions.length > 0 && (
+            <Button
+              variant="outline"
+              className="gap-2 border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+              onClick={handleExportXlsx}
+              title="ส่งออกคลังข้อสอบที่แสดงอยู่เป็นไฟล์ Excel"
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              ส่งออก Excel (.xlsx)
+            </Button>
+          )}
           {/* ปุ่ม "ลบคำถามทั้งหมด" แสดงเฉพาะเมื่อเลือกรายวิชาเจาะจงไว้แล้วเท่านั้น
               ถ้ากรองแบบ "ทุกรายวิชา" (all) จะไม่แสดงปุ่มนี้เลย เพื่อป้องกันการลบข้ามชั้น/ข้ามวิชาโดยไม่ตั้งใจ */}
           {filterSubject !== 'all' && filteredQuestions.length > 0 && (
