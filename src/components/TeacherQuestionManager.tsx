@@ -10,7 +10,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { exportAoaToXlsx, thaiToday } from '@/lib/exportXlsx';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Edit, Trash2, HelpCircle, FileSpreadsheet } from 'lucide-react';
+import { Plus, Edit, Trash2, HelpCircle, FileSpreadsheet, Shuffle } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { QuestionImage } from '@/components/QuestionImage';
 import { fileToDataUrl, uploadQuestionImage } from '@/lib/questionImages';
@@ -51,6 +51,7 @@ const TeacherQuestionManager = ({ teacherId, subjects }: TeacherQuestionManagerP
   const [filterSubject, setFilterSubject] = useState<string>('all');
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+  const [isShuffling, setIsShuffling] = useState(false);
 
   // ใช้ ref นี้กันการ setState หลัง component unmount ไปแล้ว (เช่น ครูสลับแท็บระหว่างกำลังโหลด/บันทึกอยู่)
   const isMountedRef = useRef(true);
