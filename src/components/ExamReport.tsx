@@ -25,6 +25,8 @@ import {
   Users,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { exportAoaToXlsx, thaiToday } from '@/lib/exportXlsx';
+import { FileSpreadsheet } from 'lucide-react';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -553,6 +555,47 @@ const ExamReport = ({ teacherId }: Props) => {
     }
   };
 
+  // ส่งออกตารางคะแนนที่แสดงอยู่ (ตามเงื่อนไข/เรียงลำดับปัจจุบัน) เป็นไฟล์ .xlsx
+  const handleExportXlsx = () => {
+    if (!currentExam || !sortedResults.length) return;
+    const title = showFailingOnly
+      ? 'รายงานรายชื่อนักเรียนที่สอบไม่ผ่าน (คะแนนต่ำกว่าร้อยละ 50)'
+      : 'รายงานผลคะแนนสอบ';
+    const rows: (string | number)[][] = [
+      [title],
+      [`รายวิชา: ${currentExam.subject_name} | ระดับชั้น: ${currentExam.grade_level} | ชุดข้อสอบ: ${currentExam.exam_name}`],
+      [`ภาคเรียนที่ ${currentExam.semester || '-'} ปีการศึกษา ${currentExam.academic_year || '-'} | วันที่ส่งออก: ${thaiToday()}`],
+      [
+        'ลำดับ',
+        'เลขประจำตัวนักเรียน',
+        'ชื่อ - นามสกุล',
+        'ชั้นเรียน',
+        'คะแนนที่ได้',
+        'ข้อทั้งหมด',
+        'คิดเป็นร้อยละ',
+        'ระดับผลการเรียน',
+      ],
+    ];
+    sortedResults.forEach((result, index) => {
+      const percentage = toPercentage(result.score, result.total_questions);
+      rows.push([
+        index + 1,
+        result.students?.student_id ?? '-',
+        result.students ? `${result.students.first_name} ${result.students.last_name}` : '-',
+        result.students?.class ?? '-',
+        Number(result.score),
+        Number(result.total_questions),
+        `${percentage}%`,
+        getScoreBand(percentage).label,
+      ]);
+    });
+    exportAoaToXlsx(
+      [{ name: 'รายงานคะแนน', rows }],
+      `รายงานคะแนน_${currentExam.subject_name}_${currentExam.grade_level}.xlsx`,
+    );
+    toast({ title: 'ส่งออก Excel สำเร็จ', description: 'ไฟล์รายงานคะแนนถูกดาวน์โหลดแล้ว' });
+  };
+
   return (
     <Card className="border-slate-200 shadow-sm">
       <CardHeader className="pb-4 print-controls">
@@ -734,6 +777,17 @@ const ExamReport = ({ teacherId }: Props) => {
               >
                 {sortKey === 'name' ? <ArrowDownAZ className="mr-2 h-4 w-4" /> : <ArrowUpDown className="mr-2 h-4 w-4" />}
                 {sortKey === 'name' ? 'เรียงตามชื่อ' : 'เรียงตามคะแนน'}
+              </Button>
+
+              <Button
+                variant="outline"
+                className="border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+                disabled={!sortedResults.length}
+                onClick={handleExportXlsx}
+                title="ส่งออกตารางคะแนนที่แสดงอยู่เป็นไฟล์ Excel"
+              >
+                <FileSpreadsheet className="mr-2 h-4 w-4" />
+                ส่งออก Excel (.xlsx)
               </Button>
 
               <Button disabled={!filteredResults.length} onClick={() => window.print()}>

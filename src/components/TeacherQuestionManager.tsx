@@ -8,8 +8,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
+import { exportAoaToXlsx, thaiToday } from '@/lib/exportXlsx';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Edit, Trash2, HelpCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, HelpCircle, FileSpreadsheet } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { QuestionImage } from '@/components/QuestionImage';
 import { fileToDataUrl, uploadQuestionImage } from '@/lib/questionImages';
@@ -360,6 +361,43 @@ const TeacherQuestionManager = ({ teacherId, subjects }: TeacherQuestionManagerP
     return labels[answer] || answer;
   };
 
+  // ส่งออกคลังข้อสอบที่กรองอยู่ (ทุกวิชา หรือเฉพาะวิชาที่เลือก) เป็นไฟล์ .xlsx
+  const handleExportXlsx = () => {
+    if (!filteredQuestions.length) return;
+    const subjectLabel = filterSubject === 'all'
+      ? 'ทุกรายวิชา'
+      : (() => {
+          const match = subjects.find((s) => s.id === filterSubject);
+          return match ? `${match.subject_code} ${match.subject_name}` : '';
+        })();
+    const rows: (string | number | null)[][] = [
+      ['คลังข้อสอบ'],
+      [`รายวิชา: ${subjectLabel} | จำนวนข้อสอบ: ${filteredQuestions.length} ข้อ | วันที่ส่งออก: ${thaiToday()}`],
+      ['ลำดับ', 'รหัสวิชา', 'ชื่อวิชา', 'ข้อที่', 'โจทย์', 'ตัวเลือกก', 'ตัวเลือกข', 'ตัวเลือกค', 'ตัวเลือกง', 'คำตอบที่ถูก'],
+    ];
+    filteredQuestions.forEach((question, index) => {
+      rows.push([
+        index + 1,
+        question.subjects?.subject_code ?? '',
+        question.subjects?.subject_name ?? '',
+        index + 1,
+        question.question_text,
+        question.option_a,
+        question.option_b,
+        question.option_c,
+        question.option_count === 4 ? question.option_d : '-',
+        getAnswerLabel(question.correct_answer),
+      ]);
+    });
+    exportAoaToXlsx(
+      [{ name: 'คลังข้อสอบ', rows }],
+      filterSubject === 'all'
+        ? `คลังข้อสอบทุกวิชา_${filteredQuestions.length}ข้อ.xlsx`
+        : `คลังข้อสอบ_${subjectLabel.replace(/\s+/g, '_')}.xlsx`,
+    );
+    toast({ title: 'ส่งออก Excel สำเร็จ', description: `ส่งออกข้อสอบ ${filteredQuestions.length} ข้อแล้ว` });
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -383,6 +421,18 @@ const TeacherQuestionManager = ({ teacherId, subjects }: TeacherQuestionManagerP
 
         {/* แถบปุ่มจัดการด้านบน */}
         <div className="flex flex-wrap items-center gap-2">
+          {/* ปุ่มส่งออกคลังข้อสอบเป็นไฟล์ Excel (.xlsx) */}
+          {filteredQuestions.length > 0 && (
+            <Button
+              variant="outline"
+              className="gap-2 border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+              onClick={handleExportXlsx}
+              title="ส่งออกคลังข้อสอบที่แสดงอยู่เป็นไฟล์ Excel"
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              ส่งออก Excel (.xlsx)
+            </Button>
+          )}
           {/* ปุ่ม "ลบคำถามทั้งหมด" แสดงเฉพาะเมื่อเลือกรายวิชาเจาะจงไว้แล้วเท่านั้น
               ถ้ากรองแบบ "ทุกรายวิชา" (all) จะไม่แสดงปุ่มนี้เลย เพื่อป้องกันการลบข้ามชั้น/ข้ามวิชาโดยไม่ตั้งใจ */}
           {filterSubject !== 'all' && filteredQuestions.length > 0 && (
